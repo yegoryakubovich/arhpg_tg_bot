@@ -55,7 +55,9 @@ def user_get(function):
                 text=Text.get('greetings_sso_button'),
                 url=url,
             ))
-            return await message.reply(text=Text.get('greetings_sso'), reply_markup=kb)
+            await message.reply(text=Text.get('greetings'))
+            await message.answer(text=Text.get('greetings_sso'), reply_markup=kb)
+            return
 
         user = await User.get(tg_user_id=tg_user_id)
 

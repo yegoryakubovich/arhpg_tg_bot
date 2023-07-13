@@ -15,20 +15,22 @@
 #
 
 
-from app.db.db import db
+from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
+
+from app.repositories import Text
 
 
-def db_manager(function):
-    async def wrapper(*args):
-        with db:
-            return await function(*args)
-    return wrapper
+class Kbs:
+    @staticmethod
+    async def back():
+        kb = ReplyKeyboardMarkup(resize_keyboard=True)
+        kb.add(KeyboardButton(text=Text.get('back')))
+        return kb
 
-
-def db_manager_sync(function):
-    def wrapper(*args, **kwargs):
-        with db:
-            result = function(*args, **kwargs)
-        return result
-
-    return wrapper
+    @staticmethod
+    async def menu():
+        kb = ReplyKeyboardMarkup(resize_keyboard=True)
+        kb.add(KeyboardButton(text=Text.get('menu_program')))
+        kb.add(KeyboardButton(text=Text.get('menu_faqs')))
+        kb.add(KeyboardButton(text=Text.get('menu_support')))
+        return kb

@@ -15,20 +15,17 @@
 #
 
 
-from app.db.db import db
+from peewee import PrimaryKeyField, CharField, ForeignKeyField
+
+from app.db.models.base import BaseModel
+from app.db.models.faqs import Faq
 
 
-def db_manager(function):
-    async def wrapper(*args):
-        with db:
-            return await function(*args)
-    return wrapper
+class FaqAttachment(BaseModel):
+    id = PrimaryKeyField()
+    faq = ForeignKeyField(model=Faq, on_delete='cascade')
+    type = CharField(max_length=8)
+    value = CharField(max_length=2048)
 
-
-def db_manager_sync(function):
-    def wrapper(*args, **kwargs):
-        with db:
-            result = function(*args, **kwargs)
-        return result
-
-    return wrapper
+    class Meta:
+        db_table = 'faqs_attachments'

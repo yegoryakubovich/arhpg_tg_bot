@@ -16,6 +16,8 @@
 
 
 from app.db.models.categories_texts import CategoryText as CategoryTextModel
+from app.db.models.faqs import Faq
+from app.db.models.faqs_attachments import FaqAttachment
 from app.db.models.texts import Text as TextModel
 from app.db.models.users import User as UserModel
 
@@ -24,4 +26,6 @@ models = (
     CategoryTextModel,
     TextModel,
     UserModel,
+    Faq,
+    FaqAttachment,
 )

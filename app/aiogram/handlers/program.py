@@ -15,20 +15,22 @@
 #
 
 
-from app.db.db import db
+from aiogram import types
+
+from app.aiogram.kbs import Kbs
+from app.aiogram.states import States
+from app.db.manager import db_manager
+from app.repositories import Text
+from app.utils.decorators import user_get
 
 
-def db_manager(function):
-    async def wrapper(*args):
-        with db:
-            return await function(*args)
-    return wrapper
+@db_manager
+@user_get
+async def handler_program(message: types.Message, user):
+    text = message.text
 
-
-def db_manager_sync(function):
-    def wrapper(*args, **kwargs):
-        with db:
-            result = function(*args, **kwargs)
-        return result
-
-    return wrapper
+    if text == Text.get('back'):
+        await States.menu.set()
+        await message.reply(text=Text.get('menu'), reply_markup=await Kbs.menu())
+    else:
+        await message.reply(text=Text.get('error'))

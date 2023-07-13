@@ -15,8 +15,22 @@
 #
 
 
-from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
+from aiogram import types
+
+from app.aiogram.kbs import Kbs
+from app.aiogram.states import States
+from app.db.manager import db_manager
+from app.repositories import Text
+from app.utils.decorators import user_get
 
 
-kb_back = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=False)
-kb_back.add(KeyboardButton(''))
+@db_manager
+@user_get
+async def handler_support(message: types.Message, user):
+    text = message.text
+
+    if text == Text.get('back'):
+        await States.menu.set()
+        await message.reply(text=Text.get('menu'), reply_markup=await Kbs.menu())
+    else:
+        await message.reply(text=Text.get('error'))

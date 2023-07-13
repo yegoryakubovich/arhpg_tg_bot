@@ -16,11 +16,15 @@
 
 
 from aiogram import Bot, Dispatcher
+from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.types import ContentType
 from aiogram.utils import executor
 
+from app.aiogram.handlers.faqs import handler_faqs
 from app.aiogram.handlers.menu import handler_menu
+from app.aiogram.handlers.program import handler_program
 from app.aiogram.handlers.start import handler_start
+from app.aiogram.handlers.support import handler_support
 from app.aiogram.states import States
 from config import TG_BOT_TOKEN
 
@@ -36,12 +40,14 @@ bot = Bot(
 #     pool_size=10,
 #     prefix=REDIS_PREFIX,
 # )
-# dp = Dispatcher(bot=bot, storage=storage)
-
-dp = Dispatcher(bot=bot)
+storage = MemoryStorage()
+dp = Dispatcher(bot=bot, storage=storage)
 HANDLERS = [
-    {'handler': handler_start, 'state': None, 'content_types': [ContentType.TEXT], 'commands': ['start']},
+    {'handler': handler_start, 'state': '*', 'content_types': [ContentType.TEXT], 'commands': ['start', 'menu']},
     {'handler': handler_menu, 'state': States.menu, 'content_types': [ContentType.TEXT]},
+    {'handler': handler_program, 'state': States.program, 'content_types': [ContentType.TEXT]},
+    {'handler': handler_faqs, 'state': States.faqs, 'content_types': [ContentType.TEXT]},
+    {'handler': handler_support, 'state': States.support, 'content_types': [ContentType.TEXT]},
 ]
 
 
