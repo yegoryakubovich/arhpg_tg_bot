@@ -18,5 +18,5 @@
 from aiogram.dispatcher.filters.state import StatesGroup, State
 
 
-class Form(StatesGroup):
-    main = State()
+class States(StatesGroup):
+    menu = State()

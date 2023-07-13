@@ -16,12 +16,22 @@
 
 
 from aiogram import types
+from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 
+from app.aiogram.states import States
 from app.db.manager import db_manager
+from app.repositories import Text
 from app.utils.decorators import user_get
 
 
 @db_manager
 @user_get
 async def handler_start(message: types.Message, user):
-    await message.reply(message.text)
+    await States.menu.set()
+
+    kb = ReplyKeyboardMarkup(resize_keyboard=True)
+    kb.add(KeyboardButton(text=Text.get('menu_program')))
+    kb.add(KeyboardButton(text=Text.get('menu_faqs')))
+    kb.add(KeyboardButton(text=Text.get('menu_support')))
+
+    await message.reply(text=Text.get('menu'), reply_markup=kb)

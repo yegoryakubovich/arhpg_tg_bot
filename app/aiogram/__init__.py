@@ -16,10 +16,12 @@
 
 
 from aiogram import Bot, Dispatcher
+from aiogram.types import ContentType
 from aiogram.utils import executor
 
-from app.aiogram.form import Form
+from app.aiogram.handlers.menu import handler_menu
 from app.aiogram.handlers.start import handler_start
+from app.aiogram.states import States
 from config import TG_BOT_TOKEN
 
 
@@ -38,12 +40,21 @@ bot = Bot(
 
 dp = Dispatcher(bot=bot)
 HANDLERS = [
-    {'handler': handler_start, 'state': None, 'content_types': ['text']},
+    {'handler': handler_start, 'state': None, 'content_types': [ContentType.TEXT], 'commands': ['start']},
+    {'handler': handler_menu, 'state': States.menu, 'content_types': [ContentType.TEXT]},
 ]
 
 
 def handlers_create():
-    [dp.register_message_handler(h['handler'], state=h['state'], content_types=h['content_types']) for h in HANDLERS]
+    [
+        dp.register_message_handler(
+            callback=h.get('handler'),
+            state=h.get('state'),
+            content_types=h.get('content_types'),
+            commands=h.get('commands'),
+        )
+        for h in HANDLERS
+    ]
 
 
 def bot_create():
