@@ -1,0 +1,16 @@
+[db]
+host = 127.0.0.1
+port = 3306
+user = root
+password = password
+name = db_name
+
+[api]
+sso_host = 127.0.0.1
+sso_client_id = sso_client_id
+sso_client_secret = sso_client_secret
+sso_redirect_url = sso_redirect_url
+
+[tg]
+bot_username = bot_username
+bot_token = bot_token
