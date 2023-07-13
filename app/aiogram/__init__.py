@@ -26,6 +26,7 @@ from app.aiogram.handlers.program import handler_program
 from app.aiogram.handlers.start import handler_start
 from app.aiogram.handlers.support import handler_support
 from app.aiogram.states import States
+from app.utils.faq import display_faqs, handle_text_button
 from config import TG_BOT_TOKEN
 
 

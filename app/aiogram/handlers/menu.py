@@ -17,11 +17,15 @@
 
 from aiogram import types
 
+
+from app.aiogram.handlers.program import handler_program
+from app.aiogram.handlers.support import handler_support
 from app.aiogram.kbs import Kbs
 from app.aiogram.states import States
 from app.db.manager import db_manager
 from app.repositories import Text
 from app.utils.decorators import user_get
+from app.utils.faq import display_faqs
 
 
 @db_manager
@@ -32,11 +36,14 @@ async def handler_menu(message: types.Message, user):
     if text == Text.get('menu_program'):
         await States.program.set()
         await message.reply(text=Text.get('program'), reply_markup=await Kbs.back())
+        await handler_program(message, user)
     elif text == Text.get('menu_faqs'):
         await States.faqs.set()
         await message.reply(text=Text.get('faqs'), reply_markup=await Kbs.back())
+        await display_faqs(message, user)
     elif text == Text.get('menu_support'):
         await States.support.set()
         await message.reply(text=Text.get('support'), reply_markup=await Kbs.back())
+        await handler_support(message, user)
     else:
         await message.reply(text=Text.get('error'), reply_markup=await Kbs.menu())
