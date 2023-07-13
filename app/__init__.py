@@ -17,6 +17,7 @@
 
 from app.aiogram import bot_create
 from app.db import tables_create
+from app.db.models.users import User
 
 
 def app_create():

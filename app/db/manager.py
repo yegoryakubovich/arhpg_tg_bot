@@ -21,9 +21,7 @@ from app.db.db import db
 def db_manager(function):
     async def wrapper(*args):
         with db:
-            result = await function(*args)
-
-        return result
+            return await function(*args)
 
     return wrapper
 

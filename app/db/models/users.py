@@ -22,7 +22,7 @@ from app.db.models.base import BaseModel
 
 class User(BaseModel):
     id = PrimaryKeyField()
-    arhpg_id = BigIntegerField(unique=True)
+    arhpg_id = BigIntegerField()
     arhpg_token = CharField(max_length=1024)
     tg_user_id = BigIntegerField()
     firstname = CharField(max_length=128, null=True)

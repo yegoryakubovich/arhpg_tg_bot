@@ -18,9 +18,10 @@
 from aiogram import types
 
 from app.db.manager import db_manager
+from app.utils.decorators import user_get
 
 
 @db_manager
-async def handler_start(message: types.Message):
-    user_id = message.from_user.id
-    print(user_id)
+@user_get
+async def handler_start(message: types.Message, user):
+    await message.reply(message.text)

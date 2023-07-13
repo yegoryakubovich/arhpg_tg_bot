@@ -17,18 +17,45 @@
 
 from app.db.models import UserModel
 from app.repositories.base import BaseRepository
+from app.utils.api_client import api_client
 
 
 class User(BaseRepository):
-    model = UserModel
+    @staticmethod
+    async def create(arhpg_id: int, arhpg_token: str, tg_user_id: int, firstname: str, lastname: str) -> UserModel:
+        user = UserModel.get_or_none(UserModel.tg_user_id == tg_user_id)
+        if not user:
+            user = UserModel(
+                arhpg_id=arhpg_id,
+                arhpg_token=arhpg_token,
+                tg_user_id=tg_user_id,
+                firstname=firstname,
+                lastname=lastname,
+            )
+            user.save()
+            return user
 
-    def create(self, arhpg_id: int, arhpg_token: str, tg_user_id: int, firstname: str, lastname: str):
-        user = self.model(
-            arhpg_id=arhpg_id,
-            arhpg_token=arhpg_token,
-            tg_user_id=tg_user_id,
-            firstname=firstname,
-            lastname=lastname,
-        )
+        user.arhpg_token = arhpg_token
         user.save()
+
+        return user
+
+    @staticmethod
+    async def is_authorized(tg_user_id: int) -> bool:
+        user = UserModel.get_or_none(UserModel.tg_user_id == tg_user_id)
+
+        if user:
+            if user.arhpg_token:
+                sso_user = await api_client.sso.user_get(token=user.arhpg_token)
+                arhpg_id = sso_user.get('leader_id')
+                if not arhpg_id:
+                    user.arhpg_token = False
+                    user.save()
+                    return False
+                return True
+        return False
+
+    @staticmethod
+    async def get(tg_user_id: int) -> UserModel:
+        user = UserModel.get(UserModel.tg_user_id == tg_user_id)
         return user
