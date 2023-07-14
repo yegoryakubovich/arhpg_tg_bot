@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
+from enum import Enum
 
 from app.repositories.base import BaseRepository
 from app.db.models import FaqModel
@@ -24,7 +24,7 @@ class FaqTypes:
     text = 'text'
 
 
-class FaqAttachmentTypes:
+class FaqAttachmentTypes(Enum):
     url = 'url'
     text = 'text'
     image = 'image'
@@ -34,7 +34,7 @@ class FaqAttachmentTypes:
 class Faq(BaseRepository):
     @staticmethod
     def list_get() -> list[FaqModel]:
-        faqs = FaqModel.select().order_by(FaqModel.priority.desc())
+        faqs = FaqModel.select().order_by(FaqModel.priority.asc())
         return faqs
 
     @staticmethod

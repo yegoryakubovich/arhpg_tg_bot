@@ -34,38 +34,3 @@ async def handler_faqs(message: types.Message, user):
         await message.reply(text=Text.get('menu'), reply_markup=await Kbs.menu())
     else:
         await message.reply(text=Text.get('error'))
-
-# @db_manager
-# @user_get
-# async def handle_text_button(callback_query: types.CallbackQuery):
-#     data = callback_query.data.split(':')
-#     if len(data) == 2 and data[0] == 'faq_attachment':
-#         attachment_id = data[1]
-#         attachment = FaqAttachment.get_or_none(id=attachment_id)
-#
-#         if attachment and attachment.type == 'text':
-#             await callback_query.bot.send_message(chat_id=callback_query.message.chat.id, text=attachment.value)
-#
-#
-# @db_manager
-# @user_get
-# async def display_faqs(message: types.Message, user):
-#     faqs = Faq.select()
-#
-#     for faq in faqs:
-#         attachments = FaqAttachment.select().where(FaqAttachment.faq == faq)
-#         keyboard = InlineKeyboardMarkup(row_width=1)
-#
-#         for attachment in attachments:
-#             if attachment.type == 'url':
-#                 button = InlineKeyboardButton(
-#                     text=faq.answer_button, url=attachment.value)
-#             elif attachment.type == 'text':
-#                 button = InlineKeyboardButton(
-#                     text=faq.answer_button, callback_data=f"faq_attachment:{attachment.id}")
-#             else:
-#                 continue
-#
-#             keyboard.add(button)
-#
-#         await message.bot.send_message(chat_id=message.chat.id, text=faq.question, reply_markup=keyboard)
