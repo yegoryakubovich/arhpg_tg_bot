@@ -15,17 +15,29 @@
 #
 
 
-from app.db.models.categories_texts import CategoryText as CategoryTextModel
-from app.db.models.faqs import Faq as FaqModel
-from app.db.models.faqs_attachments import FaqAttachment as FaqAttachmentModel
-from app.db.models.texts import Text as TextModel
-from app.db.models.users import User as UserModel
+from app.repositories.base import BaseRepository
+from app.db.models import FaqModel
 
 
-models = (
-    CategoryTextModel,
-    TextModel,
-    UserModel,
-    FaqModel,
-    FaqAttachmentModel,
-)
+class FaqTypes:
+    url = 'url'
+    text = 'text'
+
+
+class FaqAttachmentTypes:
+    url = 'url'
+    text = 'text'
+    image = 'image'
+    file = 'file'
+
+
+class Faq(BaseRepository):
+    @staticmethod
+    def list_get() -> list[FaqModel]:
+        faqs = FaqModel.select().order_by(FaqModel.priority.desc())
+        return faqs
+
+    @staticmethod
+    def get(id: int) -> FaqModel:
+        faq = FaqModel.get(FaqModel.id == id)
+        return faq

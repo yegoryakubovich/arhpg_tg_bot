@@ -15,17 +15,15 @@
 #
 
 
-from app.db.models.categories_texts import CategoryText as CategoryTextModel
-from app.db.models.faqs import Faq as FaqModel
-from app.db.models.faqs_attachments import FaqAttachment as FaqAttachmentModel
-from app.db.models.texts import Text as TextModel
-from app.db.models.users import User as UserModel
+from aiogram.types import InlineQuery, CallbackQuery
+
+from app.db.manager import db_manager
+from app.utils.decorators import user_get
 
 
-models = (
-    CategoryTextModel,
-    TextModel,
-    UserModel,
-    FaqModel,
-    FaqAttachmentModel,
-)
+@db_manager
+@user_get
+async def handler_faqs_button(callback_query: CallbackQuery, user):
+    print(callback_query.data)
+    await callback_query.message.reply('ffww')
+    await callback_query.answer()

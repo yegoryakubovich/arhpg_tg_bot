@@ -17,23 +17,17 @@
 
 from aiogram import Bot, Dispatcher
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
-from aiogram.types import ContentType
 from aiogram.utils import executor
 
-from app.aiogram.handlers.faqs import handler_faqs
-from app.aiogram.handlers.menu import handler_menu
-from app.aiogram.handlers.program import handler_program
-from app.aiogram.handlers.start import handler_start
-from app.aiogram.handlers.support import handler_support
-from app.aiogram.states import States
-from app.utils.faq import display_faqs, handle_text_button
+from app.aiogram.handlers.register import handlers_register
 from config import TG_BOT_TOKEN
 
 
 bot = Bot(
     token=TG_BOT_TOKEN,
 )
-# storage = RedisStorage2(
+storage = MemoryStorage()
+#  RedisStorage2(
 #     host=REDIS_HOST,
 #     port=REDIS_PORT,
 #     password=REDIS_PASSWORD,
@@ -41,29 +35,9 @@ bot = Bot(
 #     pool_size=10,
 #     prefix=REDIS_PREFIX,
 # )
-storage = MemoryStorage()
 dp = Dispatcher(bot=bot, storage=storage)
-HANDLERS = [
-    {'handler': handler_start, 'state': '*', 'content_types': [ContentType.TEXT], 'commands': ['start', 'menu']},
-    {'handler': handler_menu, 'state': States.menu, 'content_types': [ContentType.TEXT]},
-    {'handler': handler_program, 'state': States.program, 'content_types': [ContentType.TEXT]},
-    {'handler': handler_faqs, 'state': States.faqs, 'content_types': [ContentType.TEXT]},
-    {'handler': handler_support, 'state': States.support, 'content_types': [ContentType.TEXT]},
-]
-
-
-def handlers_create():
-    [
-        dp.register_message_handler(
-            callback=h.get('handler'),
-            state=h.get('state'),
-            content_types=h.get('content_types'),
-            commands=h.get('commands'),
-        )
-        for h in HANDLERS
-    ]
 
 
 def bot_create():
-    handlers_create()
-    executor.start_polling(dp)
+    handlers_register(dp=dp)
+    executor.start_polling(dispatcher=dp)

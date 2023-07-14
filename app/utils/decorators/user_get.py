@@ -15,36 +15,40 @@
 #
 
 
-from aiogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
 
 from app.repositories import User, Text
 from app.utils.api_client import api_client
 
 
+not_returned = False
+
+
 def user_get(function):
     async def wrapper(*args):
-        message = args[0]
-        message: Message
+        obj = args[0]
+        tg_user_id = obj.from_user.id
 
-        tg_user_id = message.from_user.id
-        commands = message.text.split()
+        if type(obj) is Message:
+            message = obj
+            commands = message.text.split()
 
-        if len(commands) == 2:
-            arhpg_token = commands[-1]
+            if len(commands) == 2:
+                arhpg_token = commands[-1]
 
-            sso_user = await api_client.sso.user_get(token=arhpg_token)
-            arhpg_id = sso_user.get('leader_id')
-            firstname = sso_user.get('firstname')
-            lastname = sso_user.get('lastname')
+                sso_user = await api_client.sso.user_get(token=arhpg_token)
+                arhpg_id = sso_user.get('leader_id')
+                firstname = sso_user.get('firstname')
+                lastname = sso_user.get('lastname')
 
-            if arhpg_id:
-                await User.create(
-                    arhpg_id=arhpg_id,
-                    arhpg_token=arhpg_token,
-                    tg_user_id=tg_user_id,
-                    firstname=firstname,
-                    lastname=lastname,
-                )
+                if arhpg_id:
+                    await User.create(
+                        arhpg_id=arhpg_id,
+                        arhpg_token=arhpg_token,
+                        tg_user_id=tg_user_id,
+                        firstname=firstname,
+                        lastname=lastname,
+                    )
 
         is_authorized = await User.is_authorized(tg_user_id=tg_user_id)
         if not is_authorized:
@@ -55,16 +59,22 @@ def user_get(function):
                 text=Text.get('greetings_sso_button'),
                 url=url,
             ))
-            await message.reply(text=Text.get('greetings'))
-            await message.answer(text=Text.get('greetings_sso'), reply_markup=kb)
+            await obj.answer(text=Text.get('greetings'))
+            await obj.answer(text=Text.get('greetings_sso'), reply_markup=kb)
             return
 
         user = await User.get(tg_user_id=tg_user_id)
 
-        kwargs = {
-            'message': message,
-            'user': user,
-        }
+        kwargs = {}
+
+        if type(obj) is Message:
+            kwargs['message'] = obj
+        elif type(obj) is CallbackQuery:
+            kwargs['callback_query'] = obj
+
+        if not not_returned:
+            kwargs['user'] = user
+
         return await function(**kwargs)
 
     return wrapper

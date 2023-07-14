@@ -23,7 +23,7 @@ from app.db.models.faqs import Faq
 
 class FaqAttachment(BaseModel):
     id = PrimaryKeyField()
-    faq = ForeignKeyField(model=Faq, on_delete='cascade')
+    faq = ForeignKeyField(model=Faq, on_delete='cascade', backref='attachments')
     type = CharField(max_length=8)
     value = CharField(max_length=2048)
 
