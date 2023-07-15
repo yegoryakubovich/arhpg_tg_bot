@@ -33,6 +33,15 @@ async def handler_menu(message: types.Message, user):
     if text == Text.get('menu_program'):
         await States.program.set()
         await message.reply(text=Text.get('program'), reply_markup=await Kbs.back())
+
+        keyboard = InlineKeyboardMarkup(row_width=1)
+        keyboard.add(
+            InlineKeyboardButton(text=Text.get('my_programs'), callback_data='my_programs'),
+            InlineKeyboardButton(text=Text.get('general_programs'), callback_data='general_programs')
+        )
+
+        await message.answer(text=Text.get('menu_info'), reply_markup=keyboard)
+
     elif text == Text.get('menu_faqs'):
         await States.faqs.set()
         await message.reply(text=Text.get('faqs'), reply_markup=await Kbs.back())

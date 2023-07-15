@@ -35,6 +35,7 @@ def handlers_register(dp: Dispatcher):
         dp.register_callback_query_handler(
             h.get('handler'),
             lambda callback_query: callback_query.data.startswith('faqs'),
+            lambda callback_query: callback_query.data.startswith('programs'),
             state=h.get('state'),
         )
         for h in handlers_inline
