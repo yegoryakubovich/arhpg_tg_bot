@@ -16,7 +16,7 @@
 
 
 from aiogram import Dispatcher
-from aiogram.utils.callback_data import CallbackData
+
 
 from app.aiogram.handlers import handlers, handlers_inline
 
@@ -34,9 +34,8 @@ def handlers_register(dp: Dispatcher):
     [
         dp.register_callback_query_handler(
             h.get('handler'),
-            lambda callback_query: callback_query.data.startswith('faqs'),
-            lambda callback_query: callback_query.data.startswith('programs'),
-            state=h.get('state'),
+            lambda callback_query, starts_with=h.get('starts_with'): callback_query.data.startswith(starts_with),
+            state=h.get('state')
         )
         for h in handlers_inline
     ]

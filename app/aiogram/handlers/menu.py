@@ -15,9 +15,7 @@
 #
 
 
-from aiogram import types
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, KeyboardButton, Message, ReplyKeyboardMarkup
 from app.aiogram.kbs import Kbs
 from app.aiogram.states import States
 from app.db.manager import db_manager
@@ -27,20 +25,18 @@ from app.utils.decorators import user_get
 
 @db_manager
 @user_get
-async def handler_menu(message: types.Message, user):
+async def handler_menu(message: Message, user):
     text = message.text
 
     if text == Text.get('menu_program'):
         await States.program.set()
-        await message.reply(text=Text.get('program'), reply_markup=await Kbs.back())
-
-        keyboard = InlineKeyboardMarkup(row_width=1)
+        keyboard = ReplyKeyboardMarkup(resize_keyboard=True)
         keyboard.add(
-            InlineKeyboardButton(text=Text.get('my_programs'), callback_data='my_programs'),
-            InlineKeyboardButton(text=Text.get('general_programs'), callback_data='general_programs')
+            KeyboardButton(Text.get('user_programs')),
+            KeyboardButton(Text.get('general_programs')),
         )
-
-        await message.answer(text=Text.get('menu_info'), reply_markup=keyboard)
+        keyboard.add(KeyboardButton(Text.get('back')))
+        await message.reply(text=Text.get('program'), reply_markup=keyboard)
 
     elif text == Text.get('menu_faqs'):
         await States.faqs.set()

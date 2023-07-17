@@ -40,4 +40,5 @@ dp = Dispatcher(bot=bot, storage=storage)
 
 def bot_create():
     handlers_register(dp=dp)
-    executor.start_polling(dispatcher=dp)
+    executor.start_polling(dispatcher=dp,)
+
