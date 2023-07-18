@@ -36,5 +36,9 @@ API_SSO_CLIENT_ID = config_api['sso_client_id']
 API_SSO_CLIENT_SECRET = config_api['sso_client_secret']
 API_SSO_REDIRECT_URL = config_api['sso_redirect_url']
 
+API_XLE_HOST = config_api['xle_host']
+API_XLE_CONTEXT = config_api['xle_context']
+API_XLE_TOKEN = config_api['xle_app_token']
+
 TG_BOT_USERNAME = config_tg['bot_username']
 TG_BOT_TOKEN = config_tg['bot_token']

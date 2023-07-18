@@ -62,12 +62,3 @@ class User(BaseRepository):
         user = UserModel.get(UserModel.tg_user_id == tg_user_id)
         return user
 
-    @staticmethod
-    async def get_arhpg_id(arhpg_id: int) -> UserModel:
-        arhpg_id = UserModel.get(UserModel.arhpg_id == arhpg_id)
-        return arhpg_id
-
-    @staticmethod
-    async def get_arhpg_token(arhpg_token: int) -> UserModel:
-        arhpg_token = UserModel.get(UserModel.arhpg_token == arhpg_token)
-        return arhpg_token

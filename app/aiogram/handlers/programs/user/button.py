@@ -4,19 +4,13 @@ from aiogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 from app.db.manager import db_manager
 from app.repositories import Text
 from app.utils.decorators import user_get
-
-
-EVENT_UUID = '7a715579-48fc-48a9-a63e-3362bebffd46'
-APP_TOKEN = 'p4rhd9f6qjlprqi1'
-BASE_API_URL = 'https://xle.u2035test.ru/api/v1/event/'
+from app.utils.decorators.programs import get_upcoming_events
 
 
 @db_manager
 @user_get
 async def handler_program_user(message: Message, user):
-    url = f'{BASE_API_URL}{EVENT_UUID}?app_token={APP_TOKEN}'
-
-    events = get_upcoming_events(user.id, max_events=5)
+    events = await get_upcoming_events(user.id, max_events=5)
     if not events:
         keyboard = InlineKeyboardMarkup().add(
             InlineKeyboardButton(text=Text.get('entry_programs'), url="ссылка_на_платформу")
@@ -24,21 +18,16 @@ async def handler_program_user(message: Message, user):
         await message.answer(text=Text.get('error_not_programs'), reply_markup=keyboard)
         return
 
-    response = requests.get(url)
-    if response.status_code == 200:
-        data = response.json()
+    event_list_text = "В ближайшее время у вас:\n"
+    for event in events:
+        event_title = event.get('event_title')
+        place_title = event.get('place', {}).get('title')
+        event_list_text += f"[{Text.get('name_programs')} {event_title}, {Text.get('place_programs')} {place_title}]\n"
 
-        event_title = data.get('event_title')
-        place_title = data.get('place', {}).get('title')
+    keyboard = InlineKeyboardMarkup(row_width=2)
+    keyboard.add(
+        InlineKeyboardButton(text=Text.get('full_programs'), url="ссылка_на_платформу"),
+        InlineKeyboardButton(text=Text.get('return_back'), callback_data='return_back')
+    )
 
-        message_text = (
-            f"\n\n{Text.get('name_programs')} {event_title}"
-            f"\n{Text.get('place_programs')} {place_title}"
-        )
-        await message.answer(
-            message_text, reply_markup=InlineKeyboardMarkup().add(
-                InlineKeyboardButton(text=Text.get('full_programs'), url=url)
-            )
-        )
-    else:
-        await message.answer(text=Text.get('error'))
+    await message.answer(event_list_text, reply_markup=keyboard)

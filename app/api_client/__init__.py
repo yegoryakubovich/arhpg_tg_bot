@@ -16,8 +16,10 @@
 
 
 from app.api_client.sso import ApiClientSSO
-from config import API_SSO_HOST
+from app.api_client.xle import ApiClientXLE
+from config import API_SSO_HOST, API_XLE_HOST
 
 
 class ApiClient:
     sso = ApiClientSSO(host=API_SSO_HOST)
+    xle = ApiClientXLE(host=API_XLE_HOST)
