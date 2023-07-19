@@ -23,7 +23,7 @@ async def handler_program_user(message: Message, user):
         await message.answer(text=Text.get('error_not_programs'), reply_markup=keyboard)
         return
 
-    upcoming_events = [event for event in events if event['date'] > now]
+    upcoming_events = [event for event in events if event['date'] > now and event.get('status') == 'running']
     sorted_upcoming_events = sorted(upcoming_events, key=lambda x: x['date'])
     events = sorted_upcoming_events[:5]
 

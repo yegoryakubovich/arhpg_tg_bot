@@ -23,7 +23,8 @@ async def handler_general_programs(message: Message, user, selected_date=None):
         if not selected_date:
             selected_date = current_datetime
 
-        if event_start_dt.date() == selected_date.date() and event_start_dt >= current_datetime:
+        if event_start_dt.date() == selected_date.date() and event_start_dt >= current_datetime  \
+                and event.get('status') == 'running':
             upcoming_events.append(event)
 
     upcoming_events = sorted(upcoming_events, key=lambda x: x['start_dt'])
