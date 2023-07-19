@@ -15,10 +15,8 @@ async def handler_program(message: types.Message, user):
     text = message.text
 
     if text == Text.get('user_programs'):
-        await States.program_user.set()
         await handler_program_user(message, user)
     elif text == Text.get('general_programs'):
-        await States.program_general.set()
         await handler_general_programs(message, user)
     elif text == Text.get('back'):
         await States.menu.set()

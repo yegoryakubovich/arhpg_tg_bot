@@ -1,12 +1,8 @@
 from datetime import datetime, timezone, timedelta
-
 from aiogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
 from app.db.manager import db_manager
 from app.utils.api_client import api_client
 from app.utils.decorators import user_get
-
-
-selected_date = None
 
 
 @db_manager
@@ -15,14 +11,14 @@ async def handler_general_programs(message: Message, user, selected_date=None):
     current_datetime = datetime.now(timezone.utc)
     current_datetime_str = current_datetime.strftime("%Y-%m-%d")
     all_events = await api_client.xle.get_events(current_datetime_str)
-    upcoming_events = []
 
+    upcoming_events = []
     for event in all_events:
         event_start_dt_str = event.get('start_dt')
         if not event_start_dt_str:
             continue
 
-        event_start_dt = datetime.strptime(event_start_dt_str[:-6], "%Y-%m-%dT%H:%M:%S")
+        event_start_dt = datetime.fromisoformat(event_start_dt_str[:-6])
 
         if not selected_date:
             selected_date = current_datetime
@@ -34,13 +30,15 @@ async def handler_general_programs(message: Message, user, selected_date=None):
 
     if not upcoming_events:
         await message.reply(text='Ближайших мероприятий нет')
-    else:
-        await message.reply(text='Ближайшие мероприятия')
+        return
+
+    await message.reply(text='Ближайшие мероприятия')
 
     for event in upcoming_events[:5]:
         event_title = event.get('title')
         event_start_dt = datetime.fromisoformat(event['start_dt'][:-6])
         event_end_dt = datetime.fromisoformat(event['end_dt'][:-6])
+        event_place_title = event.get('palace', 'title')
         event_uuid = event.get('event_uuid')
 
         if event_uuid:
@@ -49,27 +47,26 @@ async def handler_general_programs(message: Message, user, selected_date=None):
             event_link = None
 
         event_text = f"{event_start_dt.strftime('%d.%m %H:%M')} - {event_end_dt.strftime('%H:%M')}" \
-                     f"\n{event_title}"
+                     f"\n{event_title}" \
+                     f"\n{event_place_title}"
 
         keyboard = InlineKeyboardMarkup(row_width=1)
         if event_link:
-            keyboard.add(InlineKeyboardButton(text="Просмотреть мероприятие", url=event_link))
+            keyboard.add(InlineKeyboardButton(text="Полная программа", url=event_link))
 
         await message.answer(event_text, reply_markup=keyboard)
 
+    keyboard_buttons = [
+        ("Позже", "later"),
+        ("Раньше", "earlier"),
+        ("Выбрать дату", "select_date"),
+    ]
     if len(upcoming_events) > 5:
-        keyboard = InlineKeyboardMarkup(row_width=2)
-        keyboard.add(
-            InlineKeyboardButton(text="Позже", callback_data="later"),
-            InlineKeyboardButton(text="Выбрать дату", callback_data="select_date"),
-            InlineKeyboardButton(text="Вернуться назад", callback_data="go_back")
-        )
-    else:
-        keyboard = InlineKeyboardMarkup(row_width=2)
-        keyboard.add(
-            InlineKeyboardButton(text="Выбрать дату", callback_data="select_date"),
-            InlineKeyboardButton(text="Вернуться назад", callback_data="go_back")
-        )
+        keyboard_buttons.pop(1 if selected_date == upcoming_events[-1]['start_dt'][:-6] else 0)
+
+    keyboard = InlineKeyboardMarkup(row_width=2)
+    for text, callback_data in keyboard_buttons:
+        keyboard.add(InlineKeyboardButton(text=text, callback_data=callback_data))
 
     await message.answer("Выберите действие:", reply_markup=keyboard)
 
@@ -90,7 +87,34 @@ async def handle_later(callback_query: CallbackQuery, user):
 
     upcoming_events = sorted(upcoming_events, key=lambda x: x['start_dt'])
 
+    if upcoming_events:
+        selected_date = datetime.fromisoformat(upcoming_events[-1]['start_dt'][:-6]).date()
+        await handler_general_programs(callback_query.message, callback_query.from_user, selected_date, upcoming_events[:5])
+    else:
+        await callback_query.answer(text="Нет ближайших мероприятий")
+
+
+@db_manager
+@user_get
+async def handle_earlier(callback_query: CallbackQuery, user):
+    current_datetime = datetime.now(timezone.utc)
+    current_datetime_str = current_datetime.strftime("%Y-%m-%d")
+    all_events = await api_client.xle.get_events(current_datetime_str)
+
+    selected_date = current_datetime.date()
+    upcoming_events = []
+    for event in all_events:
+        event_start_dt = datetime.fromisoformat(event['start_dt'][:-6])
+
+        if event_start_dt >= selected_date:
+            break
+
+        upcoming_events.append(event)
+
+    upcoming_events = sorted(upcoming_events, key=lambda x: x['start_dt'], reverse=True)
+
     await handler_general_programs(callback_query.message, callback_query.from_user, selected_date, upcoming_events[:5])
+
 
 @db_manager
 @user_get
@@ -115,23 +139,22 @@ async def handle_select_date(callback_query: CallbackQuery, user):
 
     keyboard = InlineKeyboardMarkup(row_width=2)
 
-    for i in range(7):
-        date_in_7_days = current_datetime + timedelta(days=i)
-        if date_in_7_days.date() not in upcoming_dates:
+    for i in range(5):
+        date_in_5_days = current_datetime + timedelta(days=i)
+        if date_in_5_days.date() not in upcoming_dates:
             break
-        formatted_date = date_in_7_days.strftime("%Y-%m-%d")
-        keyboard.add(InlineKeyboardButton(text=date_in_7_days.strftime('%A, %d %B'),
+        formatted_date = date_in_5_days.strftime("%Y-%m-%d")
+        keyboard.add(InlineKeyboardButton(text=date_in_5_days.strftime('%A, %d %B'),
                                           callback_data=f"select_date:{formatted_date}"))
 
     keyboard.add(InlineKeyboardButton(text="Вернуться назад", callback_data="go_back"))
 
     await callback_query.message.answer(date_list_text, reply_markup=keyboard)
 
-# Функция для обработки выбранной пользователем даты
+
 @db_manager
 @user_get
-async def handle_selected_date(callback_query: CallbackQuery):
-    global selected_date
+async def handle_selected_date(callback_query: CallbackQuery, user):
     date_str = callback_query.data.split('_')[1]
     selected_date = datetime.strptime(date_str, "%Y-%m-%d")
-    await handler_general_programs(callback_query.message, callback_query.from_user, selected_date.date())
+    await handler_general_programs(callback_query.message, callback_query.from_user, selected_date)

@@ -34,3 +34,11 @@ class Kbs:
         kb.add(KeyboardButton(text=Text.get('menu_faqs')))
         kb.add(KeyboardButton(text=Text.get('menu_support')))
         return kb
+
+    @staticmethod
+    async def programs():
+        kb = ReplyKeyboardMarkup(resize_keyboard=True)
+        kb.add(KeyboardButton(text=Text.get('user_programs')))
+        kb.add(KeyboardButton(text=Text.get('general_programs')))
+        kb.add(KeyboardButton(text=Text.get('back')))
+        return kb

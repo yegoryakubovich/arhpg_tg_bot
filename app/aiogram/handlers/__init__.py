@@ -24,7 +24,6 @@ from app.aiogram.handlers.programs.programs import handler_program
 from app.aiogram.handlers.programs.user.button import handler_program_user
 from app.aiogram.handlers.start import handler_start
 from app.aiogram.handlers.faqs.button import handler_faqs_button
-from app.aiogram.handlers.faqs.faqs import handler_faqs
 from app.aiogram.handlers.support import handler_support
 from app.aiogram.states import States
 
@@ -34,9 +33,8 @@ handlers = (
     {'handler': handler_start, 'state': '*', 'content_types': [ContentType.TEXT], 'commands': ['start', 'menu']},
     {'handler': handler_menu, 'state': States.menu, 'content_types': [ContentType.TEXT]},
     {'handler': handler_program, 'state': States.program, 'content_types': [ContentType.TEXT]},
-    {'handler': handler_program_user, 'state': States.program_user, 'content_types': [ContentType.TEXT]},
-    {'handler': handler_general_programs, 'state': States.program_general, 'content_types': [ContentType.TEXT]},
-    {'handler': handler_faqs, 'state': States.faqs, 'content_types': [ContentType.TEXT]},
+    {'handler': handler_program_user, 'state': States.program, 'content_types': [ContentType.TEXT]},
+    {'handler': handler_general_programs, 'state': States.program, 'content_types': [ContentType.TEXT]},
     {'handler': handler_support, 'state': States.support, 'content_types': [ContentType.TEXT]},
 )
 

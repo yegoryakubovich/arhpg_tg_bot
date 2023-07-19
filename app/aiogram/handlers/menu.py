@@ -39,7 +39,6 @@ async def handler_menu(message: Message, user):
         await message.reply(text=Text.get('program'), reply_markup=keyboard)
 
     elif text == Text.get('menu_faqs'):
-        await States.faqs.set()
         await message.reply(text=Text.get('faqs'))
 
         for faq in Faq.list_get():

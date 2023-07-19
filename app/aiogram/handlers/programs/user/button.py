@@ -5,6 +5,7 @@ from app.db.manager import db_manager
 from app.repositories import Text
 from app.utils.api_client import api_client
 from app.utils.decorators import user_get
+from config import ALL_PROGRAMS
 
 
 @db_manager
@@ -17,7 +18,7 @@ async def handler_program_user(message: Message, user):
 
     if not events:
         keyboard = InlineKeyboardMarkup().add(
-            InlineKeyboardButton(text=Text.get('entry_programs'), url="https://www.google.de/")
+            InlineKeyboardButton(text=Text.get('entry_programs'), url=ALL_PROGRAMS)
         )
         await message.answer(text=Text.get('error_not_programs'), reply_markup=keyboard)
         return
@@ -27,15 +28,17 @@ async def handler_program_user(message: Message, user):
     events = sorted_upcoming_events[:5]
 
     event_list_text = "В ближайшее время у вас:\n"
+    keyboard = InlineKeyboardMarkup(row_width=2)
+
     for event in events:
         event_title = event.get('event_title')
         place_title = event.get('place', 'title')
+        event_uuid = event.get('event_uuid')
         event_list_text += f"{Text.get('name_programs')} {event_title}," \
                            f"{Text.get('place_programs')} {place_title}\n"
 
-    keyboard = InlineKeyboardMarkup(row_width=2)
-    keyboard.add(
-        InlineKeyboardButton(text=Text.get('full_programs'), url="https://www.google.de/"),
-    )
+        if event_uuid:
+            event_link = await api_client.xle.oauth_url_create(event_uuid)
+            keyboard.add(InlineKeyboardButton(text=Text.get('full_programs'), url=event_link))
 
     await message.answer(event_list_text, reply_markup=keyboard)

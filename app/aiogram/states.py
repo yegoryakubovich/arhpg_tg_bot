@@ -21,7 +21,4 @@ from aiogram.dispatcher.filters.state import StatesGroup, State
 class States(StatesGroup):
     menu = State()
     program = State()
-    program_user = State()
-    program_general = State()
-    faqs = State()
     support = State()
