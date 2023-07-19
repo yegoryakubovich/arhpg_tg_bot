@@ -37,7 +37,7 @@ def user_get(function):
                 arhpg_token = commands[-1]
 
                 sso_user = await api_client.sso.user_get(token=arhpg_token)
-                arhpg_id = sso_user.get('leader_id')
+                arhpg_id = sso_user.get('unti_id')
                 firstname = sso_user.get('firstname')
                 lastname = sso_user.get('lastname')
 

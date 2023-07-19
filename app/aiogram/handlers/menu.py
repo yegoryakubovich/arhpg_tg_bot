@@ -40,7 +40,7 @@ async def handler_menu(message: Message, user):
 
     elif text == Text.get('menu_faqs'):
         await States.faqs.set()
-        await message.reply(text=Text.get('faqs'), reply_markup=await Kbs.back())
+        await message.reply(text=Text.get('faqs'))
 
         for faq in Faq.list_get():
             keyboard = InlineKeyboardMarkup(row_width=1)
