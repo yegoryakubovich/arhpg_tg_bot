@@ -1,33 +1,32 @@
 from datetime import datetime, timezone, timedelta
+
+import pytz
 from aiogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
 from app.db.manager import db_manager
 from app.utils.api_client import api_client
 from app.utils.decorators import user_get
+from config import URL_PROGRAM
 
 
 @db_manager
 @user_get
 async def handler_general_programs(message: Message, user, selected_date=None):
-    current_datetime = datetime.now(timezone.utc)
-    current_datetime_str = current_datetime.strftime("%Y-%m-%d")
-    all_events = await api_client.xle.get_events(current_datetime_str)
-
+    now = datetime.now(pytz.timezone('Europe/Moscow'))
+    if selected_date is None:
+        selected_date = now.date()
+    all_events = await api_client.xle.get_events(selected_date.strftime('%Y-%m-%d'))
     upcoming_events = []
+    current_datetime = now.astimezone(pytz.timezone('Europe/Moscow'))
+
     for event in all_events:
         event_start_dt_str = event.get('start_dt')
         if not event_start_dt_str:
             continue
 
-        event_start_dt = datetime.fromisoformat(event_start_dt_str[:-6])
+        event_start_dt = datetime.fromisoformat(event_start_dt_str.replace('Z', '+00:00'))
 
-        if not selected_date:
-            selected_date = current_datetime
-
-        if event_start_dt.date() == selected_date.date() and event_start_dt >= current_datetime  \
-                and event.get('status') == 'running':
+        if event_start_dt >= current_datetime:
             upcoming_events.append(event)
-
-    upcoming_events = sorted(upcoming_events, key=lambda x: x['start_dt'])
 
     if not upcoming_events:
         await message.reply(text='Ближайших мероприятий нет')
@@ -39,31 +38,37 @@ async def handler_general_programs(message: Message, user, selected_date=None):
         event_title = event.get('title')
         event_start_dt = datetime.fromisoformat(event['start_dt'][:-6])
         event_end_dt = datetime.fromisoformat(event['end_dt'][:-6])
-        event_place_title = event.get('palace', 'title')
-        event_uuid = event.get('event_uuid')
-
-        if event_uuid:
-            event_link = await api_client.xle.oauth_url_create(event_uuid)
-        else:
-            event_link = None
+        event_place_title = event['place'].get('title')
 
         event_text = f"{event_start_dt.strftime('%d.%m %H:%M')} - {event_end_dt.strftime('%H:%M')}" \
                      f"\n{event_title}" \
                      f"\n{event_place_title}"
 
         keyboard = InlineKeyboardMarkup(row_width=1)
-        if event_link:
-            keyboard.add(InlineKeyboardButton(text="Полная программа", url=event_link))
-
+        event_uuid = event.get('event_uuid')
+        if event_uuid:
+            event_url = f"{URL_PROGRAM}{event_uuid}"
+            keyboard.add(InlineKeyboardButton(text=event_text, url=event_url))
         await message.answer(event_text, reply_markup=keyboard)
 
-    keyboard_buttons = [
-        ("Позже", "later"),
-        ("Раньше", "earlier"),
-        ("Выбрать дату", "select_date"),
-    ]
-    if len(upcoming_events) > 5:
-        keyboard_buttons.pop(1 if selected_date == upcoming_events[-1]['start_dt'][:-6] else 0)
+    keyboard_buttons = []
+
+    current_date_found = False
+    for event in upcoming_events:
+        event_start_date = datetime.fromisoformat(event['start_dt'][:-6]).date()
+
+        if event_start_date == selected_date:
+            current_date_found = True
+            break
+
+    if not current_date_found:
+        keyboard_buttons.append(("Раньше", "earlier"))
+
+    keyboard_buttons.append(("Позже", "later"))
+    keyboard_buttons.append(("Выбрать дату", "select_date"))
+
+    if len(upcoming_events) <= 5:
+        keyboard_buttons.pop(0)
 
     keyboard = InlineKeyboardMarkup(row_width=2)
     for text, callback_data in keyboard_buttons:
@@ -117,9 +122,8 @@ async def handle_earlier(callback_query: CallbackQuery, user):
     await handler_general_programs(callback_query.message, callback_query.from_user, selected_date, upcoming_events[:5])
 
 
-@db_manager
 @user_get
-async def handle_select_date(callback_query: CallbackQuery, user):
+async def handle_select_date(message: Message, user):
     current_datetime = datetime.now(timezone.utc)
     current_datetime_str = current_datetime.strftime("%Y-%m-%d")
     all_events = await api_client.xle.get_events(current_datetime_str)
@@ -128,7 +132,7 @@ async def handle_select_date(callback_query: CallbackQuery, user):
 
     upcoming_dates = []
     for start_dt in event_dates:
-        event_start_dt = datetime.fromisoformat(start_dt[:-6])
+        event_start_dt = datetime.fromisoformat(start_dt.replace('Z', '+00:00')).astimezone(timezone.utc)
         if event_start_dt >= current_datetime:
             upcoming_dates.append(event_start_dt.date())
 
@@ -148,14 +152,12 @@ async def handle_select_date(callback_query: CallbackQuery, user):
         keyboard.add(InlineKeyboardButton(text=date_in_5_days.strftime('%A, %d %B'),
                                           callback_data=f"select_date:{formatted_date}"))
 
-    keyboard.add(InlineKeyboardButton(text="Вернуться назад", callback_data="go_back"))
-
-    await callback_query.message.answer(date_list_text, reply_markup=keyboard)
+    await message.answer(date_list_text, reply_markup=keyboard)
 
 
 @db_manager
 @user_get
 async def handle_selected_date(callback_query: CallbackQuery, user):
-    date_str = callback_query.data.split('_')[1]
+    date_str = callback_query.data.split(':')[1]
     selected_date = datetime.strptime(date_str, "%Y-%m-%d")
     await handler_general_programs(callback_query.message, callback_query.from_user, selected_date)

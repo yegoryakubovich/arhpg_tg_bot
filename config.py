@@ -44,4 +44,6 @@ API_XLE_TOKEN = config_api['xle_app_token']
 TG_BOT_USERNAME = config_tg['bot_username']
 TG_BOT_TOKEN = config_tg['bot_token']
 
-ALL_PROGRAMS = config_url['all_programs']
+URL_ALL_PROGRAMS = config_url['all_programs']
+URL_MY_PROGRAMS = config_url['my_programs']
+URL_PROGRAM = config_url['program']
