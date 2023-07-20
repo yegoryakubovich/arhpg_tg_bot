@@ -41,6 +41,6 @@ async def handler_program_user(message: Message, user):
 
     if keyboard.inline_keyboard:
         keyboard.add(InlineKeyboardButton(text=Text.get('full_programs'), url=URL_ALL_PROGRAMS))
-        await message.answer(text=Text.get('shortly'), reply_markup=keyboard)
+        await message.answer(text=Text.get('shortly_user_programs'), reply_markup=keyboard)
     else:
         await message.answer(text=Text.get('error_not_programs'))

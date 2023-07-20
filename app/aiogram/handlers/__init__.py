@@ -42,5 +42,5 @@ handlers_inline = (
     {'handler': handler_faqs_button, 'state': '*', 'starts_with': 'faqs'},
     {'handler': handle_later, 'state': '*', 'starts_with': 'later'},
     {'handler': handle_select_date, 'state': '*', 'starts_with': 'select_date'},
-    {'handler': handle_selected_date, 'state': '*', 'starts_with': 'select_date_'}
+    {'handler': handle_selected_date, 'state': '*', 'starts_with': 'selected_date'}
 )
