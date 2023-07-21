@@ -25,6 +25,7 @@ config_db = config['db']
 config_api = config['api']
 config_tg = config['tg']
 config_url = config['test_url']
+config_usedesk = config['usedesk']
 
 MYSQL_HOST = config_db['host']
 MYSQL_PORT = int(config_db['port'])
@@ -47,3 +48,7 @@ TG_BOT_TOKEN = config_tg['bot_token']
 URL_ALL_PROGRAMS = config_url['all_programs']
 URL_MY_PROGRAMS = config_url['my_programs']
 URL_PROGRAM = config_url['program']
+
+USEDESK_HOST = config_usedesk['usedesk_host']
+USEDESK_ID = config_usedesk['usedesk_id']
+USEDESK_API_TOKEN = config_usedesk['usedesk_token']

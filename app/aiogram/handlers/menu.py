@@ -16,7 +16,6 @@
 
 
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, KeyboardButton, Message, ReplyKeyboardMarkup
-from app.aiogram.kbs import Kbs
 from app.aiogram.states import States
 from app.db.manager import db_manager
 from app.repositories import Text, Faq, FaqTypes
@@ -59,6 +58,4 @@ async def handler_menu(message: Message, user):
 
     elif text == Text.get('menu_support'):
         await States.support.set()
-        await message.reply(text=Text.get('support'), reply_markup=await Kbs.back())
-    else:
-        await message.reply(text=Text.get('error'), reply_markup=await Kbs.menu())
+        await message.reply("Пожалуйста, опишите вашу проблему, вопрос или жалобу:")

@@ -1,6 +1,5 @@
 from aiogram import types
 
-from app.aiogram.handlers import handler_general_programs
 from app.aiogram.kbs import Kbs
 from app.aiogram.states import States
 from app.db.manager import db_manager
@@ -12,6 +11,7 @@ from app.utils.decorators import user_get
 @user_get
 async def handler_program(message: types.Message, user):
     from app.aiogram.handlers import handler_program_user
+    from app.aiogram.handlers import handler_general_programs
     text = message.text
 
     if text == Text.get('user_programs'):
