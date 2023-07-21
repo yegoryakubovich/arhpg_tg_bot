@@ -23,7 +23,7 @@ async def handler_support(message: types.Message, user):
     }
 
     response = requests.post(f'{USEDESK_HOST}', json=data)
-
+    print(response.content)
     if response.status_code == 200:
         await message.reply("Ваш запрос принят. Служба поддержки свяжется с вами в ближайшее время.")
     else:
