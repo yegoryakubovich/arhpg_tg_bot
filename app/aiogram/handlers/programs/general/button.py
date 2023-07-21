@@ -62,11 +62,10 @@ async def handler_general_programs(message: Message, user):
 
     await message.answer(text='Выберите действие', reply_markup=keyboard)
 
-
 @db_manager
 @user_get
-async def handle_select_date(callback_query: CallbackQuery, user):
-    current_datetime = datetime.now(timezone.utc)
+async def handler_select_date(callback_query: CallbackQuery, user):
+    current_datetime = datetime.now(pytz.timezone('Europe/Moscow'))
     date_list_text = "Выберите дату:\n"
     keyboard = InlineKeyboardMarkup(row_width=1)
 
@@ -82,20 +81,19 @@ async def handle_select_date(callback_query: CallbackQuery, user):
 
 @db_manager
 @user_get
-async def handle_selected_date(callback_query: CallbackQuery, user):
+async def handler_selected_date(callback_query: CallbackQuery, user):
     selected_date_str = callback_query.data.strip()[14:]
-    selected_date = datetime.strptime(selected_date_str, "%Y-%m-%d")
+    selected_date = datetime.strptime(selected_date_str, "%Y-%m-%d").date()
     all_events = await api_client.xle.get_events(selected_date.strftime('%Y-%m-%d'))
     upcoming_events = []
-    print(all_events)
+
     for event in all_events:
         event_start_dt_str = event.get('start_dt')
         if not event_start_dt_str:
             continue
 
-        event_start_dt = datetime.fromisoformat(event_start_dt_str.replace('Z', '+00:00'))
-        print(event_start_dt)
-        print(selected_date)
+        event_start_dt = datetime.fromisoformat(event_start_dt_str.replace('Z', '+00:00')).date()
+
         if event_start_dt == selected_date:
             upcoming_events.append(event)
 
@@ -114,40 +112,40 @@ async def handle_selected_date(callback_query: CallbackQuery, user):
 
     keyboard_buttons = []
 
-    current_date_found = False
     for event in upcoming_events:
         event_start_date = datetime.fromisoformat(event['start_dt'][:-6]).date()
 
-        if event_start_date == selected_date.date():
-            current_date_found = True
+        if event_start_date < selected_date:
+            keyboard_buttons.append(("Раньше", "earlier"))
+            break
+        elif event_start_date > selected_date:
+            keyboard_buttons.append(("Позже", "later"))
             break
 
-    if not current_date_found:
-        keyboard_buttons.append(("Раньше", "earlier"))
+    if len(upcoming_events) > 1:
+        if len(upcoming_events) <= 5:
+            keyboard_buttons.append(("Раньше", "earlier"))
+        else:
+            keyboard_buttons.append(("Раньше", "earlier"))
+            keyboard_buttons.append(("Позже", "later"))
 
-    keyboard_buttons.append(("Позже", "later"))
-    keyboard_buttons.append(("Выбрать дату", "select_date"))
-
-    if len(upcoming_events) <= 5:
-        keyboard_buttons.pop(0)
-
-    keyboard = InlineKeyboardMarkup(row_width=2)
-    for text, callback_data in keyboard_buttons:
-        keyboard.add(InlineKeyboardButton(text=text, callback_data=callback_data))
-
-    await callback_query.message.answer(text='Выберите действие', reply_markup=keyboard)
+    if keyboard_buttons:
+        keyboard = InlineKeyboardMarkup(row_width=2)
+        for text, callback_data in keyboard_buttons:
+            keyboard.add(InlineKeyboardButton(text=text, callback_data=callback_data))
+        await callback_query.message.answer(text='Выберите действие', reply_markup=keyboard)
 
 
 @db_manager
 @user_get
-async def handle_later(callback_query: CallbackQuery, user):
+async def handler_later(callback_query: CallbackQuery, user):
     current_datetime = datetime.now(timezone.utc)
     current_datetime_str = current_datetime.strftime("%Y-%m-%d")
     all_events = await api_client.xle.get_events(current_datetime_str)
 
     upcoming_events = []
     for event in all_events:
-        event_start_dt = datetime.fromisoformat(event['start_dt'][:-6])
+        event_start_dt = pytz.timezone('Europe/Moscow').localize(datetime.fromisoformat(event['start_dt'][:-6]))
 
         if event_start_dt > current_datetime:
             upcoming_events.append(event)
@@ -155,29 +153,51 @@ async def handle_later(callback_query: CallbackQuery, user):
     upcoming_events = sorted(upcoming_events, key=lambda x: x['start_dt'])
 
     if upcoming_events:
-        selected_date = datetime.fromisoformat(upcoming_events[-1]['start_dt'][:-6]).date()
-        await handler_general_programs(callback_query.message, callback_query.from_user, selected_date, upcoming_events[:5])
+        keyboard_buttons = [("Раньше", "earlier"), ("Выбрать дату", "select_date")]
+
+        if len(upcoming_events) > 5:
+            keyboard_buttons.append(("Позже", "later"))
+
+        keyboard = InlineKeyboardMarkup(row_width=2)
+        for text, callback_data in keyboard_buttons:
+            keyboard.add(InlineKeyboardButton(text=text, callback_data=callback_data))
+
+        events_to_show = upcoming_events
+
+        message_text = f"Ближайщие мероприятия:"
+        for event in events_to_show:
+            event_text = format_event_text(event)
+            message_text += f"\n\n{event_text}"
+
+        await callback_query.message.edit_text(text=message_text, reply_markup=keyboard)
     else:
-        await callback_query.answer(text="Нет ближайших мероприятий")
+        await callback_query.answer("Нет предстоящих мероприятий")
 
 
 @db_manager
 @user_get
-async def handle_earlier(callback_query: CallbackQuery, user):
+async def handler_earlier(callback_query: CallbackQuery, user):
     current_datetime = datetime.now(timezone.utc)
     current_datetime_str = current_datetime.strftime("%Y-%m-%d")
     all_events = await api_client.xle.get_events(current_datetime_str)
 
     selected_date = current_datetime.date()
     upcoming_events = []
+    past_events = []
     for event in all_events:
-        event_start_dt = datetime.fromisoformat(event['start_dt'][:-6])
+        event_start_dt = pytz.timezone('Europe/Moscow').localize(datetime.fromisoformat(event['start_dt'][:-6]))
 
-        if event_start_dt >= selected_date:
+        if event_start_dt.date() >= selected_date:
             break
 
-        upcoming_events.append(event)
+        if event_start_dt < current_datetime:
+            past_events.append(event)
+        else:
+            upcoming_events.append(event)
 
-    upcoming_events = sorted(upcoming_events, key=lambda x: x['start_dt'], reverse=True)
+    past_events = sorted(past_events, key=lambda x: x['start_dt'], reverse=True)
 
-    await handler_general_programs(callback_query.message, callback_query.from_user, selected_date, upcoming_events[:5])
+    if past_events:
+        await handler_general_programs(callback_query.message, callback_query.from_user, selected_date, past_events[:5], is_previous=True)
+    else:
+        await callback_query.answer("Больше нет прошлых мероприятий")

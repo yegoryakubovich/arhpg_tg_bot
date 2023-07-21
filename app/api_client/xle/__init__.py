@@ -22,7 +22,7 @@ class ApiClientXLE(ApiClientBase):
 
     async def get_events(self, start_date: str):
         events = []
-        for days_delta in range(5):
+        for days_delta in range(10):
             date = (datetime.fromisoformat(start_date) + timedelta(days=days_delta)).date()
             response = await self.get(
                 path=f'/api/v1/timetable/all',
@@ -55,3 +55,20 @@ class ApiClientXLE(ApiClientBase):
         )
 
         return response
+
+    async def get_fake_events(self):
+        start_date = datetime(2023, 7, 21)
+        upcoming_events = []
+
+        for days_delta in range(5):
+            date = start_date + timedelta(days=days_delta)
+            for i in range(2):
+                fake_event = {
+                    'start_dt': (date + timedelta(hours=10)).isoformat() + '+03:00',
+                    'title': f'Фиктивное мероприятие {i + 1} {date.strftime("%Y-%m-%d")}',
+                    'description': 'Описание фиктивного мероприятия',
+                    'location': 'Место проведения фиктивного мероприятия'
+                }
+                upcoming_events.append(fake_event)
+
+        return upcoming_events
