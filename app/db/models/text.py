@@ -15,12 +15,17 @@
 #
 
 
-from app.aiogram import bot_create, dp
-from app.db import tables_create
-from app.utils.notificator_usedesk import notificator_usedesk_create
+from peewee import PrimaryKeyField, CharField, ForeignKeyField
+
+from app.db.models.base import BaseModel
+from app.db.models.category_text import CategoryText
 
 
-def app_create():
-    tables_create()
-    notificator_usedesk_create()
-    bot_create()
+class Text(BaseModel):
+    id = PrimaryKeyField()
+    category = ForeignKeyField(model=CategoryText)
+    key = CharField(max_length=256)
+    value = CharField(max_length=8192)
+
+    class Meta:
+        db_table = 'texts'

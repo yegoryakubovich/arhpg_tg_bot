@@ -40,8 +40,6 @@ class User(BaseRepository):
 
         return user
 
-
-
     @staticmethod
     async def is_authorized(tg_user_id: int) -> bool:
         user = UserModel.get_or_none(UserModel.tg_user_id == tg_user_id)

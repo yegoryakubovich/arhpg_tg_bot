@@ -15,17 +15,20 @@
 #
 
 
-from peewee import PrimaryKeyField, CharField, ForeignKeyField
-
-from app.db.models.base import BaseModel
-from app.db.models.faqs import Faq
+from app.repositories.base import BaseRepository
+from app.db.models import TicketModel
 
 
-class FaqAttachment(BaseModel):
-    id = PrimaryKeyField()
-    faq = ForeignKeyField(model=Faq, on_delete='cascade', backref='attachments')
-    type = CharField(max_length=8)
-    value = CharField(max_length=2048)
+class TicketStates:
+    waiting = 'waiting'
+    completed = 'completed'
 
-    class Meta:
-        db_table = 'faqs_attachments'
+
+class Ticket(BaseRepository):
+    @staticmethod
+    def list_waiting_get() -> list[TicketModel]:
+        tickets = TicketModel.select().where(TicketModel.state == TicketStates.waiting).execute()
+        return tickets
+
+    def create(self) -> TicketModel:
+        pass

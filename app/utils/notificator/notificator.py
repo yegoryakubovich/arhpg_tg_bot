@@ -1,5 +1,5 @@
 #
-# (c) 2023, Yegor Yakubovich, yegoryakubovich.com, personal@yegoryakybovich.com
+# (c) 2023, Yegor Yakubovich
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,12 +15,5 @@
 #
 
 
-from app.aiogram import bot_create, dp
-from app.db import tables_create
-from app.utils.notificator_usedesk import notificator_usedesk_create
-
-
-def app_create():
-    tables_create()
-    notificator_usedesk_create()
-    bot_create()
+def notificator():
+    print('task_notificator')

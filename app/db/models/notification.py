@@ -15,12 +15,16 @@
 #
 
 
-from app.aiogram import bot_create, dp
-from app.db import tables_create
-from app.utils.notificator_usedesk import notificator_usedesk_create
+from peewee import PrimaryKeyField, CharField, DateTimeField
+
+from app.db.models.base import BaseModel
 
 
-def app_create():
-    tables_create()
-    notificator_usedesk_create()
-    bot_create()
+class Notification(BaseModel):
+    id = PrimaryKeyField()
+    text = CharField(max_length=4096)
+    datetime = DateTimeField()
+    state = CharField(max_length=16)
+
+    class Meta:
+        db_table = 'notifications'

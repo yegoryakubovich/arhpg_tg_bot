@@ -18,14 +18,14 @@
 from peewee import PrimaryKeyField, CharField, ForeignKeyField
 
 from app.db.models.base import BaseModel
-from app.db.models.categories_texts import CategoryText
+from app.db.models.notification import Notification
 
 
-class Text(BaseModel):
+class NotificationAttachment(BaseModel):
     id = PrimaryKeyField()
-    category = ForeignKeyField(model=CategoryText)
-    key = CharField(max_length=256)
-    value = CharField(max_length=8192)
+    notification = ForeignKeyField(model=Notification, on_delete='cascade', backref='attachments')
+    type = CharField(max_length=8)
+    value = CharField(max_length=2048)
 
     class Meta:
-        db_table = 'texts'
+        db_table = 'notifications_attachments'

@@ -15,12 +15,17 @@
 #
 
 
-from app.aiogram import bot_create, dp
-from app.db import tables_create
-from app.utils.notificator_usedesk import notificator_usedesk_create
+from peewee import PrimaryKeyField, CharField, ForeignKeyField, BigIntegerField
+
+from app.db.models.base import BaseModel
+from app.db.models.user import User
 
 
-def app_create():
-    tables_create()
-    notificator_usedesk_create()
-    bot_create()
+class Ticket(BaseModel):
+    id = PrimaryKeyField()
+    tg_user_id = ForeignKeyField(model=User, backref='tickets')
+    ticket_id = BigIntegerField()
+    state = CharField(max_length=16)
+
+    class Meta:
+        db_table = 'tickets'

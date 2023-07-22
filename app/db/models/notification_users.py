@@ -15,12 +15,17 @@
 #
 
 
-from app.aiogram import bot_create, dp
-from app.db import tables_create
-from app.utils.notificator_usedesk import notificator_usedesk_create
+from peewee import PrimaryKeyField, ForeignKeyField
+
+from app.db.models.base import BaseModel
+from app.db.models.notification import Notification
+from app.db.models.user import User
 
 
-def app_create():
-    tables_create()
-    notificator_usedesk_create()
-    bot_create()
+class NotificationUser(BaseModel):
+    id = PrimaryKeyField()
+    notification = ForeignKeyField(model=Notification, on_delete='cascade', backref='tags')
+    user = ForeignKeyField(model=User, on_delete='cascade', backref='tags')
+
+    class Meta:
+        db_table = 'notifications_users'

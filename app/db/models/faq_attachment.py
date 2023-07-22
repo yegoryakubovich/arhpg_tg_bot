@@ -15,12 +15,17 @@
 #
 
 
-from app.aiogram import bot_create, dp
-from app.db import tables_create
-from app.utils.notificator_usedesk import notificator_usedesk_create
+from peewee import PrimaryKeyField, CharField, ForeignKeyField
+
+from app.db.models.base import BaseModel
+from app.db.models.faq import Faq
 
 
-def app_create():
-    tables_create()
-    notificator_usedesk_create()
-    bot_create()
+class FaqAttachment(BaseModel):
+    id = PrimaryKeyField()
+    faq = ForeignKeyField(model=Faq, on_delete='cascade', backref='attachments')
+    type = CharField(max_length=8)
+    value = CharField(max_length=2048)
+
+    class Meta:
+        db_table = 'faqs_attachments'

@@ -13,14 +13,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-import asyncio
+
 
 from aiogram import Bot, Dispatcher
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.utils import executor
 
 from app.aiogram.handlers.register import handlers_register
-from app.utils.decorators.support import update_all_tickets_loop, usedesk
 from config import TG_BOT_TOKEN
 
 
@@ -42,6 +41,3 @@ dp = Dispatcher(bot=bot, storage=storage)
 def bot_create():
     handlers_register(dp=dp)
     executor.start_polling(dispatcher=dp,)
-    loop = asyncio.get_event_loop()
-    loop.create_task(update_all_tickets_loop())
-    usedesk()

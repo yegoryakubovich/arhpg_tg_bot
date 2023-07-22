@@ -15,12 +15,12 @@
 #
 
 
-from app.db.models.categories_texts import CategoryText as CategoryTextModel
-from app.db.models.faqs import Faq as FaqModel
-from app.db.models.faqs_attachments import FaqAttachment as FaqAttachmentModel
-from app.db.models.support import SupportUsedesk
-from app.db.models.texts import Text as TextModel
-from app.db.models.users import User as UserModel
+from app.db.models.category_text import CategoryText as CategoryTextModel
+from app.db.models.faq import Faq as FaqModel
+from app.db.models.faq_attachment import FaqAttachment as FaqAttachmentModel
+from app.db.models.text import Text as TextModel
+from app.db.models.ticket import Ticket as TicketModel
+from app.db.models.user import User as UserModel
 
 
 models = (
@@ -29,5 +29,5 @@ models = (
     UserModel,
     FaqModel,
     FaqAttachmentModel,
-    SupportUsedesk
+    TicketModel,
 )

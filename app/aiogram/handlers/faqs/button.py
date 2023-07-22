@@ -18,7 +18,7 @@
 from aiogram import types
 
 from app.db.manager import db_manager
-from app.db.models.faqs_attachments import FaqAttachment
+from app.db.models.faq_attachment import FaqAttachment
 from app.repositories import FaqAttachmentTypes, Faq
 from app.utils.decorators import user_get
 
