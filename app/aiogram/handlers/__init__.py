@@ -24,9 +24,8 @@ from app.aiogram.handlers.programs.user.button import handler_program_user
 from app.aiogram.handlers.programs.general.general_programs import handler_general_programs
 from app.aiogram.handlers.start import handler_start
 from app.aiogram.handlers.faqs.button import handler_faqs_button
-from app.aiogram.handlers.support import handler_support
+from app.aiogram.handlers.support import handler_support, update_ticket_status
 from app.aiogram.states import States
-
 
 handlers = (
     {'handler': handler_start, 'state': None, 'content_types': [ContentType.TEXT]},
@@ -36,6 +35,7 @@ handlers = (
     {'handler': handler_program_user, 'state': States.program, 'content_types': [ContentType.TEXT]},
     {'handler': handler_general_programs, 'state': States.program, 'content_types': [ContentType.TEXT]},
     {'handler': handler_support, 'state': States.support, 'content_types': [ContentType.TEXT]},
+    {'handler': update_ticket_status, 'state': States.support, 'content_types': [ContentType.TEXT]},
 )
 
 handlers_inline = (

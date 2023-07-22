@@ -13,9 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+from aiogram.utils import executor
 
-
-from app.aiogram import bot_create
+from app.aiogram import bot_create, dp
 from app.db import tables_create
 from app.db.models.users import User
 
