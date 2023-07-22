@@ -32,10 +32,18 @@ async def handler_faqs_button(callback_query: types.CallbackQuery, user):
         faqs = Faq.list_get()
         faq = next((faq for faq in faqs if faq.id == faq_id), None)
         if faq and faq.type == FaqAttachmentTypes.text.value:
-            attachments = FaqAttachment.select().where(FaqAttachment.faq == faq)
-            text_attachments = [a for a in attachments if a.type == FaqAttachmentTypes.text.value]
-            image_attachments = [a for a in attachments if a.type == FaqAttachmentTypes.image.value]
-            file_attachments = [a for a in attachments if a.type == FaqAttachmentTypes.file.value]
+            text_attachments = FaqAttachment.select().where(
+                FaqAttachment.faq == faq,
+                FaqAttachment.type == FaqAttachmentTypes.text.value
+            )
+            image_attachments = FaqAttachment.select().where(
+                FaqAttachment.faq == faq,
+                FaqAttachment.type == FaqAttachmentTypes.image.value
+            )
+            file_attachments = FaqAttachment.select().where(
+                FaqAttachment.faq == faq,
+                FaqAttachment.type == FaqAttachmentTypes.file.value
+            )
 
             caption = '\n'.join(a.value for a in text_attachments)
 
@@ -47,37 +55,37 @@ async def handler_faqs_button(callback_query: types.CallbackQuery, user):
                         caption=caption if image_attachment == image_attachments[0] else None
                     ))
 
-                await callback_query.message.reply_media_group(media=photos)
-
+                documents = []
                 for file_attachment in file_attachments:
-                    await callback_query.message.answer_document(
-                        document=file_attachment.value
-                    )
+                    documents.append(types.InputMediaDocument(
+                        media=file_attachment.value
+                    ))
 
+                if photos:
+                    await callback_query.message.reply_media_group(media=photos)
+
+                if documents:
+                    await callback_query.message.answer_media_group(media=documents)
             else:
                 media = []
 
                 if image_attachments:
-                    media.append(types.InputMediaPhoto(
-                        media=image_attachments[0].value,
-                        caption=caption
-                    ))
-                    for image_attachment in image_attachments[1:]:
+                    for image_attachment in image_attachments:
                         media.append(types.InputMediaPhoto(
-                            media=image_attachment.value
+                            media=image_attachment.value,
+                            caption=caption if image_attachment == image_attachments[0] else None
                         ))
 
                 if file_attachments:
                     for file_attachment in file_attachments:
                         media.append(types.InputMediaDocument(
-                            media=file_attachment.value
+                            media=file_attachment.value,
+                            caption=caption if file_attachment == file_attachments[-1] else None
                         ))
-
-                    media[-1].caption = caption
 
                 if media:
                     await callback_query.message.reply_media_group(media=media)
                 else:
                     await callback_query.message.reply(text=caption)
 
-            await callback_query.answer()
+                await callback_query.answer()

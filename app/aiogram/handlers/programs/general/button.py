@@ -35,16 +35,16 @@ locale.setlocale(locale.LC_ALL, 'ru_RU.UTF-8')
 @user_get
 async def handler_select_date(callback_query: CallbackQuery, user):
     current_datetime = datetime.now(pytz.timezone('Europe/Moscow'))
-    date_list_text = "Выберите дату:\n"
+    date_list_text = Text.get('taking_date')
     keyboard = InlineKeyboardMarkup(row_width=1)
 
     for i in range(5):
         next_date = current_datetime + timedelta(days=i)
-        formatted_date = next_date.strftime("%Y-%m-%d")
+        formatted_date = next_date.strftime('%Y-%m-%d')
         formatted_date_russian = next_date.strftime('%A, %d %B')
         keyboard.add(InlineKeyboardButton(
             text=formatted_date_russian,
-            callback_data=f"selected_date_{formatted_date}"),
+            callback_data=f'selected_date_{formatted_date}'),
         )
 
     await callback_query.message.answer(date_list_text, reply_markup=keyboard)
@@ -54,7 +54,7 @@ async def handler_select_date(callback_query: CallbackQuery, user):
 @user_get
 async def handler_selected_date(callback_query: CallbackQuery, user):
     selected_date_str = callback_query.data.strip()[14:]
-    selected_date = datetime.strptime(selected_date_str, "%Y-%m-%d").date()
+    selected_date = datetime.strptime(selected_date_str, '%Y-%m-%d').date()
     all_events = await api_client.xle.get_events(selected_date_str)
     upcoming_events = []
 
@@ -77,15 +77,15 @@ async def handler_selected_date(callback_query: CallbackQuery, user):
         event_text = format_event_text(event)
         event_uuid = event.get('event_uuid')
         if event_uuid:
-            event_url = f"{URL_PROGRAM}{event_uuid}"
+            event_url = f'{URL_PROGRAM}{event_uuid}'
             keyboard.add(InlineKeyboardButton(text=event_text, url=event_url))
 
     if len(upcoming_events) > 2:
-        earlier_button = InlineKeyboardButton(text="Раньше", callback_data="earlier")
-        later_button = InlineKeyboardButton(text="Позже", callback_data="later")
+        earlier_button = InlineKeyboardButton(text=Text.get('earlier'), callback_data='earlier')
+        later_button = InlineKeyboardButton(text=Text.get('later'), callback_data='later')
         keyboard.row(earlier_button, later_button)
 
-    selected_date_button = InlineKeyboardButton(text="Выбрать дату", callback_data="select_date")
+    selected_date_button = InlineKeyboardButton(text=Text.get('choose_date'), callback_data='select_date')
     keyboard.row(selected_date_button)
 
     await callback_query.message.answer(text=Text.get('planned_day_programs'), reply_markup=keyboard)

@@ -58,4 +58,4 @@ async def handler_menu(message: Message, user):
 
     elif text == Text.get('menu_support'):
         await States.support.set()
-        await message.reply("Пожалуйста, опишите вашу проблему, вопрос или жалобу:")
+        await message.reply(text=Text.get('text_supports'))

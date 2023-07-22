@@ -54,7 +54,7 @@ async def handler_general_programs(message: Message, user):
         event_text = format_event_text(event)
         event_uuid = event.get('event_uuid')
         if event_uuid:
-            event_url = f"{URL_PROGRAM}{event_uuid}"
+            event_url = f'{URL_PROGRAM}{event_uuid}'
             keyboard.add(InlineKeyboardButton(text=event_text, url=event_url))
 
     if keyboard.inline_keyboard:
@@ -74,14 +74,14 @@ async def handler_general_programs(message: Message, user):
 
     if not current_date_found and len(upcoming_events) > 2:
         if selected_date > now.date():
-            keyboard_buttons.append(("Раньше", f"earlier_{selected_date}"))
+            keyboard_buttons.append((Text.get('earlier'), f'earlier_{selected_date}'))
         if selected_date < upcoming_events[-1]['start_dt']:
-            keyboard_buttons.append(("Позже", f"later_{selected_date}"))
+            keyboard_buttons.append((Text.get('later'), f'later_{selected_date}'))
 
-    keyboard_buttons.append(("Выбрать дату", "select_date"))
+    keyboard_buttons.append((Text.get('choose_date'), 'select_date'))
 
     keyboard = InlineKeyboardMarkup(row_width=2)
     for text, callback_data in keyboard_buttons:
         keyboard.add(InlineKeyboardButton(text=text, callback_data=callback_data))
 
-    await message.answer(text='Выберите действие', reply_markup=keyboard)
+    await message.answer(text=Text.get('сhoose_action'), reply_markup=keyboard)
