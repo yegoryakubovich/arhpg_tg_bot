@@ -23,7 +23,7 @@ from app.db.models.user import User
 
 class Ticket(BaseModel):
     id = PrimaryKeyField()
-    tg_user_id = ForeignKeyField(model=User, backref='tickets')
+    user = ForeignKeyField(model=User, backref='tickets')
     ticket_id = BigIntegerField()
     state = CharField(max_length=16)
 

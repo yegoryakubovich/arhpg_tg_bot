@@ -13,19 +13,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-import json
+
+
+import re
 
 from requests import get
 
+from app.aiogram.bot import bot_get
 from app.db.manager import db_manager
 from app.repositories import Ticket
 from app.repositories.ticket import TicketStates
-from app.db.models import TicketModel
 from config import USEDESK_HOST, USEDESK_API_TOKEN
 
 
+bot = bot_get()
+regex = re.compile(r'<(?!a|b|strong|i|em|u|ins|s|strike|del|code|pre)[^>]*>')
+
+
 @db_manager
-async def notificator_usedesk(bot, ticket_id: int):
+async def notificator_usedesk():
     for ticket in Ticket.list_waiting_get():
         response = get(
             url=f'{USEDESK_HOST}/ticket',
@@ -35,16 +41,12 @@ async def notificator_usedesk(bot, ticket_id: int):
             },
         )
         if response.status_code == 200:
-            ticket_data = json.loads(response.content)
-            ticket_status = ticket_data['status']
-            ticket_comments = ticket_data['comments']
+            response = response.json()
+            ticket_status = response['ticket']['status_id']
+            ticket_comments = response['comments'][0]['message']
+
+            ticket_comments = regex.sub('', ticket_comments)
 
             if ticket_status == 2:
-                await Ticket.update_state(ticket_id, TicketStates.completed)
-
-            ticket = TicketModel.get_or_none(TicketModel.id == ticket_id)
-            if ticket and ticket_comments:
-                for comment in ticket_comments:
-                    message = comment['message']
-                    if message:
-                        await bot.send_message(chat_id=ticket.tg_user_id.chat_id, text=message)
+                await Ticket.update_state(ticket.ticket_id, TicketStates.completed)
+                await bot.send_message(chat_id=ticket.user.tg_user_id, text=ticket_comments, parse_mode='HTML')

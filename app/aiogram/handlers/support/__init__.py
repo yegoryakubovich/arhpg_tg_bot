@@ -45,7 +45,7 @@ async def handler_support(message: types.Message, user):
         status = json.loads(response.content)['status']
         ticket_id = json.loads(response.content)['ticket_id']
         await Ticket.create(
-            tg_user_id=user.id,
+            user=user,
             message=message_text,
             state=TicketStates.waiting,
             ticket_id=ticket_id,

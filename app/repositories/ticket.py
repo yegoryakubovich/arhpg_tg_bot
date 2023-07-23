@@ -16,7 +16,7 @@
 
 
 from app.repositories.base import BaseRepository
-from app.db.models import TicketModel
+from app.db.models import TicketModel, UserModel
 
 
 class TicketStates:
@@ -32,13 +32,13 @@ class Ticket(BaseRepository):
 
     @staticmethod
     async def create(
-            tg_user_id: int,
+            user: UserModel,
             message: str,
             state: str = TicketStates.waiting,
             ticket_id: int = None,
     ) -> TicketModel:
         ticket = TicketModel(
-            tg_user_id=tg_user_id,
+            user=user,
             message=message,
             state=state,
             ticket_id=ticket_id,
@@ -48,10 +48,11 @@ class Ticket(BaseRepository):
 
     @staticmethod
     async def update_state(ticket_id: int, new_state: str):
-        ticket = TicketModel.get_or_none(TicketModel.id == ticket_id)
+        ticket = TicketModel.get_or_none(TicketModel.ticket_id == ticket_id)
         if ticket:
             ticket.state = new_state
             ticket.save()
 
-    async def handle_ticket(self, ticket_id: int):
-        await self.update_state(ticket_id, TicketStates.completed)
+
+
+
