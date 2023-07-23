@@ -15,16 +15,12 @@
 #
 
 
-from peewee import PrimaryKeyField, CharField, ForeignKeyField
-
-from app.db.models.base import BaseModel
-from app.db.models.notification import Notification
+from app.repositories.base import BaseRepository
+from app.db.models import SettingModel
 
 
-class NotificationTag(BaseModel):
-    id = PrimaryKeyField()
-    notification = ForeignKeyField(model=Notification, on_delete='cascade', backref='tags')
-    tag = CharField(max_length=64)
-
-    class Meta:
-        db_table = 'notifications_tags'
+class Setting(BaseRepository):
+    @staticmethod
+    async def events_count() -> int:
+        setting = SettingModel.get(SettingModel.key == 'events_count')
+        return int(setting.value)

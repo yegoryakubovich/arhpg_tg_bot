@@ -15,8 +15,7 @@
 #
 
 
-import re
-
+from bs4 import BeautifulSoup
 from requests import get
 
 from app.aiogram.bot import bot_get
@@ -27,7 +26,6 @@ from config import USEDESK_HOST, USEDESK_API_TOKEN
 
 
 bot = bot_get()
-regex = re.compile(r'<(?!a|b|strong|i|em|u|ins|s|strike|del|code|pre)[^>]*>')
 
 
 @db_manager
@@ -40,13 +38,17 @@ async def notificator_usedesk():
                 'ticket_id': ticket.ticket_id,
             },
         )
+
         if response.status_code == 200:
             response = response.json()
             ticket_status = response['ticket']['status_id']
-            ticket_comments = response['comments'][0]['message']
+            ticket_response = response['comments'][0]['message']
 
-            ticket_comments = regex.sub('', ticket_comments)
+            bs = BeautifulSoup(ticket_response, features='html.parser')
+            response = bs.get_text()
 
             if ticket_status == 2:
                 await Ticket.update_state(ticket.ticket_id, TicketStates.completed)
-                await bot.send_message(chat_id=ticket.user.tg_user_id, text=ticket_comments, parse_mode='HTML')
+                await bot.send_message(chat_id=ticket.user.tg_user_id, text=response, parse_mode='HTML')
+            elif ticket_status in [4]:
+                await Ticket.update_state(ticket.ticket_id, TicketStates.error)

@@ -28,7 +28,7 @@ async def handler_menu(message: Message, user):
     text = message.text
 
     if text == Text.get('menu_program'):
-        await States.program.set()
+        await States.programs.set()
         keyboard = ReplyKeyboardMarkup(resize_keyboard=True)
         keyboard.add(
             KeyboardButton(Text.get('user_programs')),

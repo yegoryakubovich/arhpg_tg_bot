@@ -23,7 +23,7 @@ from app.db.manager import db_manager
 from app.repositories import Text
 from app.utils.api_client import api_client
 from app.utils.decorators import user_get
-from config import URL_ALL_PROGRAMS, URL_PROGRAM
+from config import URL_ALL_PROGRAM, URL_PROGRAM
 
 
 @db_manager
@@ -36,7 +36,7 @@ async def handler_program_user(message: Message, user):
 
     if not events:
         keyboard = InlineKeyboardMarkup().add(
-            InlineKeyboardButton(text=Text.get('entry_programs'), url=URL_ALL_PROGRAMS)
+            InlineKeyboardButton(text=Text.get('entry_programs'), url=URL_ALL_PROGRAM)
         )
         await message.answer(text=Text.get('error_not_programs'), reply_markup=keyboard)
         return
@@ -58,5 +58,5 @@ async def handler_program_user(message: Message, user):
                 keyboard.add(InlineKeyboardButton(text=event_text, url=event_url))
 
     if keyboard.inline_keyboard:
-        keyboard.add(InlineKeyboardButton(text=Text.get('full_programs'), url=URL_ALL_PROGRAMS))
+        keyboard.add(InlineKeyboardButton(text=Text.get('full_programs'), url=URL_ALL_PROGRAM))
         await message.answer(text=Text.get('shortly_user_programs'), reply_markup=keyboard)

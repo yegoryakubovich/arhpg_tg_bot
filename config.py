@@ -24,7 +24,7 @@ config.read('config.ini')
 config_db = config['db']
 config_api = config['api']
 config_tg = config['tg']
-config_url = config['test_url']
+config_url = config['urls']
 config_usedesk = config['usedesk']
 
 MYSQL_HOST = config_db['host']
@@ -45,7 +45,7 @@ API_XLE_TOKEN = config_api['xle_token']
 TG_BOT_USERNAME = config_tg['bot_username']
 TG_BOT_TOKEN = config_tg['bot_token']
 
-URL_ALL_PROGRAMS = config_url['all_programs']
+URL_ALL_PROGRAM = config_url['all_program']
 URL_MY_PROGRAMS = config_url['my_programs']
 URL_PROGRAM = config_url['program']
 

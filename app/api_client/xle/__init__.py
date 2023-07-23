@@ -22,7 +22,7 @@ class ApiClientXLE(ApiClientBase):
 
     async def get_events(self, start_date: str):
         events = []
-        for days_delta in range(10):
+        for days_delta in range(2):
             date = (datetime.fromisoformat(start_date) + timedelta(days=days_delta)).date()
             response = await self.get(
                 path=f'/api/v1/timetable/all',

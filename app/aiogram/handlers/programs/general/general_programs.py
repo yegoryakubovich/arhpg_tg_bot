@@ -18,70 +18,19 @@
 from datetime import datetime
 
 
-import pytz
-from aiogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
+from pytz import timezone
+from aiogram.types import Message
 from app.db.manager import db_manager
-from app.repositories import Text
 
 from app.utils.decorators import user_get
-from app.utils.programs import format_event_text, get_upcoming_events
-from config import URL_PROGRAM
+from app.utils.events_get import events_get
+
+
+tz = timezone('Europe/Moscow')
 
 
 @db_manager
 @user_get
 async def handler_general_programs(message: Message, user):
-    tz = pytz.timezone('Europe/Moscow')
-    now = datetime.now()
-    selected_date_str = message.get_args()
-    if selected_date_str:
-        selected_date = datetime.strptime(selected_date_str, '%Y-%m-%d').date()
-    else:
-        now = datetime.now(tz)
-        selected_date = now.date()
-
-    selected_datetime = tz.localize(datetime.combine(selected_date, datetime.min.time()))
-
-    upcoming_events = await get_upcoming_events(selected_datetime)
-
-    if not upcoming_events:
-        await message.reply(text=Text.get('shortly_not_programs'))
-        return
-
-    keyboard = InlineKeyboardMarkup(row_width=1)
-
-    for event in upcoming_events[:3]:
-        event_text = format_event_text(event)
-        event_uuid = event.get('event_uuid')
-        if event_uuid:
-            event_url = f'{URL_PROGRAM}{event_uuid}'
-            keyboard.add(InlineKeyboardButton(text=event_text, url=event_url))
-
-    if keyboard.inline_keyboard:
-        await message.answer(text=Text.get('shortly_full_programs'), reply_markup=keyboard)
-    else:
-        await message.answer(text=Text.get('error_not_programs'))
-        return
-
-    keyboard_buttons = []
-
-    current_date_found = False
-    for event in upcoming_events:
-        event_start_datetime = tz.localize(datetime.fromisoformat(event['start_dt'][:-6]))
-        if event_start_datetime > tz.localize(datetime.now()):
-            current_date_found = True
-            break
-
-    if not current_date_found and len(upcoming_events) > 2:
-        if selected_date > now.date():
-            keyboard_buttons.append((Text.get('earlier'), f'earlier_{selected_date}'))
-        if selected_date < upcoming_events[-1]['start_dt']:
-            keyboard_buttons.append((Text.get('later'), f'later_{selected_date}'))
-
-    keyboard_buttons.append((Text.get('choose_date'), 'select_date'))
-
-    keyboard = InlineKeyboardMarkup(row_width=2)
-    for text, callback_data in keyboard_buttons:
-        keyboard.add(InlineKeyboardButton(text=text, callback_data=callback_data))
-
-    await message.answer(text=Text.get('сhoose_action'), reply_markup=keyboard)
+    text, keyboard = await events_get(datetime_selected=datetime.now(tz=tz))
+    await message.answer(text=text, reply_markup=keyboard)

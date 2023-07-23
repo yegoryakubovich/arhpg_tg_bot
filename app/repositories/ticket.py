@@ -22,6 +22,7 @@ from app.db.models import TicketModel, UserModel
 class TicketStates:
     waiting = 'waiting'
     completed = 'completed'
+    error = 'error'
 
 
 class Ticket(BaseRepository):

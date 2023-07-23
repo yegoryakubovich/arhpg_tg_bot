@@ -16,18 +16,22 @@
 
 
 from asyncio import new_event_loop, set_event_loop
+from time import sleep
+
+import aioschedule as schedule
 from threading import Thread
+
 from app.utils.notificator_usedesk.notificator_usedesk import notificator_usedesk
 
 
 def notificator_usedesk_thread():
     loop = new_event_loop()
     set_event_loop(loop)
-    loop.run_until_complete(notificator_usedesk())
-    # schedule.every(1).minute.do(notificator_usedesk)
-    # while True:
-    #     loop.run_until_complete(schedule.run_pending())
-    #     sleep(10)
+
+    schedule.every(1).minute.do(notificator_usedesk)
+    while True:
+        loop.run_until_complete(schedule.run_pending())
+        sleep(10)
 
 
 def notificator_usedesk_create():
