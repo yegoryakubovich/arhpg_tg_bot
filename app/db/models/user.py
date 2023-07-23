@@ -27,6 +27,7 @@ class User(BaseModel):
     tg_user_id = BigIntegerField()
     firstname = CharField(max_length=128, null=True)
     lastname = CharField(max_length=128, null=True)
+    email = CharField(max_length=256, null=True)
 
     class Meta:
         db_table = 'users'

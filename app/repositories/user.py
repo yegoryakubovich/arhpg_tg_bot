@@ -22,7 +22,14 @@ from app.utils.api_client import api_client
 
 class User(BaseRepository):
     @staticmethod
-    async def create(arhpg_id: int, arhpg_token: str, tg_user_id: int, firstname: str, lastname: str) -> UserModel:
+    async def create(
+            arhpg_id: int,
+            arhpg_token: str,
+            tg_user_id: int,
+            firstname: str,
+            lastname: str,
+            email: str,
+    ) -> UserModel:
         user = UserModel.get_or_none(UserModel.tg_user_id == tg_user_id)
         if not user:
             user = UserModel(
@@ -31,6 +38,7 @@ class User(BaseRepository):
                 tg_user_id=tg_user_id,
                 firstname=firstname,
                 lastname=lastname,
+                email=email,
             )
             user.save()
             return user
