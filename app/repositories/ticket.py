@@ -30,5 +30,28 @@ class Ticket(BaseRepository):
         tickets = TicketModel.select().where(TicketModel.state == TicketStates.waiting).execute()
         return tickets
 
-    def create(self) -> TicketModel:
-        pass
+    @staticmethod
+    async def create(
+            tg_user_id: int,
+            message: str,
+            state: str = TicketStates.waiting,
+            ticket_id: int = None,
+    ) -> TicketModel:
+        ticket = TicketModel(
+            tg_user_id=tg_user_id,
+            message=message,
+            state=state,
+            ticket_id=ticket_id,
+        )
+        ticket.save()
+        return ticket
+
+    @staticmethod
+    async def update_state(ticket_id: int, new_state: str):
+        ticket = TicketModel.get_or_none(TicketModel.id == ticket_id)
+        if ticket:
+            ticket.state = new_state
+            ticket.save()
+
+    async def handle_ticket(self, ticket_id: int):
+        await self.update_state(ticket_id, TicketStates.completed)

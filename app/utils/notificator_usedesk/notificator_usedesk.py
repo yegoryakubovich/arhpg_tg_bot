@@ -13,17 +13,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
+import json
 
 from requests import get
 
 from app.db.manager import db_manager
 from app.repositories import Ticket
+from app.repositories.ticket import TicketStates
+from app.db.models import TicketModel
 from config import USEDESK_HOST, USEDESK_API_TOKEN
 
 
 @db_manager
-async def notificator_usedesk():
+async def notificator_usedesk(bot, ticket_id: int):
     for ticket in Ticket.list_waiting_get():
         response = get(
             url=f'{USEDESK_HOST}/ticket',
@@ -33,9 +35,16 @@ async def notificator_usedesk():
             },
         )
         if response.status_code == 200:
-            response = response.json()
-            print(response)
-            '''if status != ticket.status:
-                ticket.status = status
-                ticket.save()
-                print(response['last_message']['message'])'''
+            ticket_data = json.loads(response.content)
+            ticket_status = ticket_data['status']
+            ticket_comments = ticket_data['comments']
+
+            if ticket_status == 2:
+                await Ticket.update_state(ticket_id, TicketStates.completed)
+
+            ticket = TicketModel.get_or_none(TicketModel.id == ticket_id)
+            if ticket and ticket_comments:
+                for comment in ticket_comments:
+                    message = comment['message']
+                    if message:
+                        await bot.send_message(chat_id=ticket.tg_user_id.chat_id, text=message)
