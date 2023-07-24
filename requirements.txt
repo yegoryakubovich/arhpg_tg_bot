@@ -1,9 +1,9 @@
-aiogram~=2.25.1
-peewee~=3.16.2
+aiogram
+peewee
 pymysql
-aiohttp==3.8.5
-furl~=2.1.3
-requests~=2.31.0
-pytz~=2023.3
-aioschedule~=0.5.2
+aiohttp
+furl
+requests
+pytz
+aioschedule
 beautifulsoup4
