@@ -50,4 +50,3 @@ async def send_notification(notification):
         notification.save()
         report.state = 'completed'
         report.save()
-

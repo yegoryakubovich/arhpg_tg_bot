@@ -33,7 +33,6 @@ class ApiClientXLE(ApiClientBase):
             },
         )
         events.extend(response)
-
         return events
 
     async def get_events(self, start_date: str):

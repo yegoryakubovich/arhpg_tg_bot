@@ -41,7 +41,7 @@ def user_get(function):
                 firstname = sso_user.get('firstname')
                 lastname = sso_user.get('lastname')
                 email = sso_user.get('email')
-                teg = 'a2023_bot'
+                tag = 'a2023_bot'
 
                 if arhpg_id:
                     await User.create(
@@ -51,7 +51,7 @@ def user_get(function):
                         firstname=firstname,
                         lastname=lastname,
                         email=email,
-                        teg=teg
+                        tag=tag
                     )
 
         is_authorized = await User.is_authorized(tg_user_id=tg_user_id)

@@ -15,5 +15,5 @@
 #
 
 
-def notificator_kafka():
+async def notificator_kafka():
     pass

@@ -29,7 +29,7 @@ class User(BaseRepository):
             firstname: str,
             lastname: str,
             email: str,
-            teg: str,
+            tag: str,
     ) -> UserModel:
         user = UserModel.get_or_none(UserModel.tg_user_id == tg_user_id)
         if not user:
@@ -40,7 +40,7 @@ class User(BaseRepository):
                 firstname=firstname,
                 lastname=lastname,
                 email=email,
-                teg=teg
+                tag=tag
             )
             user.save()
             return user

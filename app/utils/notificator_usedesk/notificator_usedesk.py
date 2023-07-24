@@ -13,7 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
+
+
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from bs4 import BeautifulSoup
 from requests import get
 
@@ -48,9 +50,8 @@ async def notificator_usedesk():
 
             if ticket_status == 2:
                 await Ticket.update_state(ticket.ticket_id, TicketStates.completed)
-
-                keyboard = ReplyKeyboardMarkup([[KeyboardButton(text=Text.get('menu_faqs'))]],
-                                               one_time_keyboard=True)
+                faq_button = InlineKeyboardButton(text=Text.get('menu_faqs'), callback_data="faq_button")
+                keyboard = InlineKeyboardMarkup([[faq_button]])
                 await bot.send_message(chat_id=ticket.user.tg_user_id, text=response, parse_mode='HTML',
                                        reply_markup=keyboard)
             elif ticket_status in [4]:
