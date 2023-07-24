@@ -16,11 +16,18 @@
 
 
 from app.aiogram import bot_create, dp
+
 from app.db import tables_create
+from app.utils.notificator import notificator_create
+from app.utils.notificator_kafka import notificator_kafka_create
+from app.utils.notificaror_program import notificator_program_create
 from app.utils.notificator_usedesk import notificator_usedesk_create
 
 
 def app_create():
     tables_create()
     notificator_usedesk_create()
+    notificator_create()
+    notificator_kafka_create()
+    notificator_program_create()
     bot_create()

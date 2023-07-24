@@ -19,6 +19,7 @@ from datetime import datetime, timedelta
 
 import pytz
 from aiogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
+
 from app.db.manager import db_manager
 from app.repositories import Text
 from app.utils.api_client import api_client
@@ -30,7 +31,7 @@ from config import URL_ALL_PROGRAM, URL_PROGRAM
 @user_get
 async def handler_program_user(message: Message, user):
     now = datetime.now(pytz.timezone('Europe/Moscow')).date()
-    five_days_later = now + timedelta(days=5)
+    five_days_later = now + timedelta(days=2)
     arhpg_id = user.arhpg_id
     events = await api_client.xle.get_user_events(arhpg_id, now.strftime('%Y-%m-%d'))
 
@@ -42,6 +43,8 @@ async def handler_program_user(message: Message, user):
         return
 
     keyboard = InlineKeyboardMarkup(row_width=2)
+    counter = 0
+
     for event in events:
         status = event.get('status')
         event_date_str = event.get('start_dt')
@@ -56,6 +59,10 @@ async def handler_program_user(message: Message, user):
             if event_uuid:
                 event_url = f"{URL_PROGRAM}{event_uuid}"
                 keyboard.add(InlineKeyboardButton(text=event_text, url=event_url))
+                counter += 1
+
+            if counter >= 5:
+                break
 
     if keyboard.inline_keyboard:
         keyboard.add(InlineKeyboardButton(text=Text.get('full_programs'), url=URL_ALL_PROGRAM))

@@ -15,25 +15,14 @@
 #
 
 
-from asyncio import new_event_loop, set_event_loop
+from app.aiogram import bot_get
+from app.db.manager import db_manager
 
-from time import sleep
-from threading import Thread
-import aioschedule as schedule
-
-from app.utils.notificator.notificator import notificator
+bot = bot_get()
 
 
-def notificator_thread():
-    loop = new_event_loop()
-    set_event_loop(loop)
-
-    schedule.every(1).seconds.do(notificator)
-    while True:
-        loop.run_until_complete(schedule.run_pending())
-        sleep(10)
+@db_manager
+async def notificator_program():
+    pass
 
 
-def notificator_create():
-    thread = Thread(target=notificator_thread, args=())
-    thread.start()

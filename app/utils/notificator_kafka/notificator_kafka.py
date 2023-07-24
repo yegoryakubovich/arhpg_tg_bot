@@ -15,25 +15,5 @@
 #
 
 
-from asyncio import new_event_loop, set_event_loop
-
-from time import sleep
-from threading import Thread
-import aioschedule as schedule
-
-from app.utils.notificator.notificator import notificator
-
-
-def notificator_thread():
-    loop = new_event_loop()
-    set_event_loop(loop)
-
-    schedule.every(1).seconds.do(notificator)
-    while True:
-        loop.run_until_complete(schedule.run_pending())
-        sleep(10)
-
-
-def notificator_create():
-    thread = Thread(target=notificator_thread, args=())
-    thread.start()
+def notificator_kafka():
+    pass

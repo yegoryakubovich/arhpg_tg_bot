@@ -28,6 +28,7 @@ class User(BaseModel):
     firstname = CharField(max_length=128, null=True)
     lastname = CharField(max_length=128, null=True)
     email = CharField(max_length=256, null=True)
+    tag = CharField()
 
     class Meta:
         db_table = 'users'

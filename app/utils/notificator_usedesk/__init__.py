@@ -18,9 +18,8 @@
 from asyncio import new_event_loop, set_event_loop
 from time import sleep
 
-import aioschedule as schedule
 from threading import Thread
-
+import aioschedule as schedule
 from app.utils.notificator_usedesk.notificator_usedesk import notificator_usedesk
 
 

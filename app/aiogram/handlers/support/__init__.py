@@ -20,10 +20,12 @@ import json
 import requests
 from aiogram import types
 
+from app.aiogram.kbs import Kbs
 from app.aiogram.states import States
 from app.db.manager import db_manager
-from app.repositories import Ticket
+from app.repositories import Ticket, Text
 from app.repositories.ticket import TicketStates
+from app.repositories.setting import Setting
 from app.utils.decorators import user_get
 from config import USEDESK_API_TOKEN, USEDESK_HOST
 
@@ -31,10 +33,27 @@ from config import USEDESK_API_TOKEN, USEDESK_HOST
 @db_manager
 @user_get
 async def handler_support(message: types.Message, user):
+    text = message.text
+    if text == Text.get('back'):
+        await States.menu.set()
+        await message.reply(text=Text.get('menu'), reply_markup=await Kbs.menu())
+        return
+
     message_text = message.text
+
+    ticket_user = Ticket.list_waiting_get()
+    waiting_tickets_count = sum(1 for ticket in ticket_user if ticket.state == TicketStates.waiting)
+
+    # Лимит тикетов
+    if waiting_tickets_count >= await Setting.limit_ticket():
+        await message.reply(
+            f"У вас уже есть максимальное количество активных тикетов ({waiting_tickets_count}), ожидающих ответа. "
+            f"Свяжитесь с нами позже.")
+        return
+
     data = {
         'api_token': USEDESK_API_TOKEN,
-        'subject': 'Запрос на поддержку от пользователя',
+        'subject': Text.get('subject_ticket'),
         'message': message_text,
         'client_name': user.firstname,
         'client_email': user.email
@@ -54,7 +73,6 @@ async def handler_support(message: types.Message, user):
         )
 
         if status == 'success':
-            await message.reply("Ваш запрос принят. Служба поддержки свяжется с вами в ближайшее время.")
-            await States.menu.set()
+            await message.reply(text=Text.get('sent_ticket'))
         else:
-            await message.reply("Произошла ошибка при отправке запроса в службу поддержки.")
+            await message.reply(text=Text.get('error_ticket'))

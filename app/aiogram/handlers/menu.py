@@ -58,4 +58,6 @@ async def handler_menu(message: Message, user):
 
     elif text == Text.get('menu_support'):
         await States.support.set()
-        await message.reply(text=Text.get('text_supports'))
+        keyboard = ReplyKeyboardMarkup(resize_keyboard=True)
+        keyboard.add(KeyboardButton(Text.get('back')))
+        await message.reply(text=Text.get('text_supports'), reply_markup=keyboard)

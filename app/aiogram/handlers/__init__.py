@@ -34,11 +34,11 @@ handlers = (
     {'handler': handler_menu, 'state': States.menu, 'content_types': [ContentType.TEXT]},
     {'handler': handler_program, 'state': States.programs, 'content_types': [ContentType.TEXT]},
     {'handler': handler_program_user, 'state': States.programs, 'content_types': [ContentType.TEXT]},
-    {'handler': handler_general_programs, 'state': '*', 'content_types': [ContentType.TEXT]},
+    {'handler': handler_general_programs, 'state': States.programs, 'content_types': [ContentType.TEXT]},
     {'handler': handler_support, 'state': States.support, 'content_types': [ContentType.TEXT]},
 )
 
 handlers_inline = (
-    {'handler': handler_faqs_button, 'state': States.programs, 'starts_with': 'faqs'},
+    {'handler': handler_faqs_button, 'state': '*', 'starts_with': 'faqs'},
     {'handler': handler_general_programs_button, 'state': '*', 'starts_with': 'programs_'},
 )

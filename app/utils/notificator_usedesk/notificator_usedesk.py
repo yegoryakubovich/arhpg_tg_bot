@@ -13,14 +13,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
-
+from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 from bs4 import BeautifulSoup
 from requests import get
 
 from app.aiogram.bot import bot_get
 from app.db.manager import db_manager
-from app.repositories import Ticket
+from app.repositories import Ticket, Text
 from app.repositories.ticket import TicketStates
 from config import USEDESK_HOST, USEDESK_API_TOKEN
 
@@ -49,6 +48,10 @@ async def notificator_usedesk():
 
             if ticket_status == 2:
                 await Ticket.update_state(ticket.ticket_id, TicketStates.completed)
-                await bot.send_message(chat_id=ticket.user.tg_user_id, text=response, parse_mode='HTML')
+
+                keyboard = ReplyKeyboardMarkup([[KeyboardButton(text=Text.get('menu_faqs'))]],
+                                               one_time_keyboard=True)
+                await bot.send_message(chat_id=ticket.user.tg_user_id, text=response, parse_mode='HTML',
+                                       reply_markup=keyboard)
             elif ticket_status in [4]:
                 await Ticket.update_state(ticket.ticket_id, TicketStates.error)

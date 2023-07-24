@@ -21,19 +21,19 @@ from time import sleep
 from threading import Thread
 import aioschedule as schedule
 
-from app.utils.notificator.notificator import notificator
+from app.utils.notificator_kafka.notificator_kafka import notificator_kafka
 
 
-def notificator_thread():
+def notificator_kafka_thread():
     loop = new_event_loop()
     set_event_loop(loop)
 
-    schedule.every(1).seconds.do(notificator)
+    schedule.every(1).minute.do(notificator_kafka)
     while True:
         loop.run_until_complete(schedule.run_pending())
         sleep(10)
 
 
-def notificator_create():
-    thread = Thread(target=notificator_thread, args=())
+def notificator_kafka_create():
+    thread = Thread(target=notificator_kafka_thread, args=())
     thread.start()

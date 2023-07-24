@@ -15,5 +15,39 @@
 #
 
 
-def notificator():
-    print('task_notificator')
+from datetime import datetime
+
+from app.aiogram import bot_get
+from app.db.manager import db_manager
+from app.db.models.notification_report import NotificationReport
+from app.db.models.notification_user import NotificationUser
+from app.db.models.user import User
+from app.repositories.notification import Notification
+
+bot = bot_get()
+
+
+@db_manager
+async def notificator():
+    current_datetime = datetime.now()
+    notifications = Notification.list_waiting_get(current_datetime)
+    for notification in notifications:
+        await send_notification(notification)
+
+
+@db_manager
+async def send_notification(notification):
+    users = [user for user in User.select().join(NotificationUser).where(NotificationUser.notification == notification)]
+    for user in users:
+        report = NotificationReport(
+            notification=notification,
+            user=user,
+            state='waiting',
+            datetime=notification.datetime,
+        )
+        await bot.send_message(user.tg_user_id, notification.text)
+        notification.state = 'completed'
+        notification.save()
+        report.state = 'completed'
+        report.save()
+

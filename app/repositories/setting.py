@@ -24,3 +24,8 @@ class Setting(BaseRepository):
     async def events_count() -> int:
         setting = SettingModel.get(SettingModel.key == 'events_count')
         return int(setting.value)
+
+    @staticmethod
+    async def limit_ticket() -> int:
+        setting = SettingModel.get(SettingModel.key == 'limit_ticket')
+        return int(setting.value)
