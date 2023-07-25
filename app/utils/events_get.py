@@ -20,22 +20,28 @@ from datetime import datetime, timedelta
 import pytz
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
+from app.aiogram.callback_datas import program_callback_data
 from app.repositories import Text
 from app.repositories.setting import Setting
 from app.utils.api_client import api_client
 from config import URL_PROGRAM, URL_ALL_PROGRAM
 
 
-async def events_get(datetime_selected: datetime):
-    events = await api_client.xle.get_events(datetime_selected.strftime('%Y-%m-%d'))
+async def events_get(datetime_selected: datetime, page=1):
+    events_in_request = await Setting.events_in_request() * page
+
+    events = await api_client.xle.get_events(
+        start_date=datetime_selected.strftime('%Y-%m-%d'),
+        events_in_request=events_in_request,
+    )
 
     # Максимальное количество МП
     events_count = await Setting.events_count()
 
-    message = Text.get(key='planned_day_programs') + '\n\n'
+    message = Text.get(key='shortly_full_programs') + '\n\n'
     keyboard = InlineKeyboardMarkup(row_width=2)
 
-    event_current = 1
+    event_current = 0
     datetime_current = datetime.now(pytz.timezone('Europe/Moscow'))
 
     for event in events:
@@ -52,43 +58,56 @@ async def events_get(datetime_selected: datetime):
         if not event_datetime_end_str:
             continue
 
+        event_current += 1
+        if event_current < events_count * page - events_count + 1:
+            continue
+
         event_datetime_end = datetime.fromisoformat(event_datetime_end_str[:-6])
-        event_title = event.get('title')[:24]
+        event_title = event.get('title')
         event_uuid = event.get('event_uuid')
         event_url = f'{URL_PROGRAM}{event_uuid}'
 
         message += f'{event_current}. {event_datetime_start.strftime("%d.%m %H:%M")} - ' \
                    f'{event_datetime_end.strftime("%H:%M")} ' \
-                   f'{event_title}'
+                   f'{event_title}\n'
         keyboard.add(InlineKeyboardButton(
             text=f'{event_current}. {event_title}',
             url=event_url,
         ))
 
-        event_current += 1
-        if event_current > events_count:
+        if event_current >= events_count * page:
             break
-
-    datetime_previews = datetime_selected - timedelta(days=1)
-    datetime_next = datetime_selected + timedelta(days=1)
 
     button_previews = InlineKeyboardButton(
         text=Text.get(key='earlier'),
-        callback_data='programs_' + datetime_previews.strftime('%Y-%m-%d'),
-    )
-    button_next = InlineKeyboardButton(
-        text=Text.get(key='later'),
-        callback_data='programs_' + datetime_next.strftime('%Y-%m-%d'),
-    )
-    button_date = InlineKeyboardButton(
-        text=Text.get(key='choose_date'),
-        callback_data='programs_date_select_{}'.format(datetime_current.strftime('%Y-%m-%d')),
+        callback_data=program_callback_data.new(
+            datetime_selected=datetime_selected.strftime('%Y-%m-%d'),
+            page=1 if page == 1 else page-1,
+        ),
     )
 
-    keyboard.row(button_previews, button_date, button_next)
+    button_next = InlineKeyboardButton(
+        text=Text.get(key='later'),
+        callback_data=program_callback_data.new(
+            datetime_selected=datetime_selected.strftime('%Y-%m-%d'),
+            page=events_count if page == 5 else page+1,
+        ),
+    )
+
+    buttons = []
+
+    if page > 1:
+        buttons.append(button_previews)
+    if page < 5 and event_current == events_count * page:
+        buttons.append(button_next)
+
+    keyboard.row(*buttons)
     keyboard.add(InlineKeyboardButton(
         text=Text.get('full_programs'),
         url=URL_ALL_PROGRAM,
     ))
+
+    if event_current == 0:
+        message = Text.get(key='shortly_not_programs')
 
     return message, keyboard

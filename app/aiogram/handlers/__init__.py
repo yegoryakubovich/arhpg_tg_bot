@@ -17,12 +17,10 @@
 
 from aiogram.types import ContentType
 
-from app.aiogram.handlers.faqs.answer_faq import handler_answer_faqs
+from app.aiogram.handlers.usedesk.answer_faq import handler_support_usedesk_button
 from app.aiogram.handlers.menu import handler_menu
 from app.aiogram.handlers.programs.general.button import handler_general_programs_button
 from app.aiogram.handlers.programs.programs import handler_program
-from app.aiogram.handlers.programs.user.button import handler_program_user
-from app.aiogram.handlers.programs.general.general_programs import handler_general_programs
 from app.aiogram.handlers.start import handler_start
 from app.aiogram.handlers.faqs.button import handler_faqs_button
 from app.aiogram.handlers.support import handler_support
@@ -34,13 +32,11 @@ handlers = (
     {'handler': handler_start, 'state': '*', 'content_types': [ContentType.TEXT], 'commands': ['start', 'menu']},
     {'handler': handler_menu, 'state': States.menu, 'content_types': [ContentType.TEXT]},
     {'handler': handler_program, 'state': States.programs, 'content_types': [ContentType.TEXT]},
-    {'handler': handler_program_user, 'state': States.programs, 'content_types': [ContentType.TEXT]},
-    {'handler': handler_general_programs, 'state': States.programs, 'content_types': [ContentType.TEXT]},
     {'handler': handler_support, 'state': States.support, 'content_types': [ContentType.TEXT]},
 )
 
 handlers_inline = (
-    {'handler': handler_faqs_button, 'state': '*', 'starts_with': 'faqs'},
-    {'handler': handler_general_programs_button, 'state': '*', 'starts_with': 'programs'},
-    {'handler': handler_answer_faqs, 'state': '*', 'starts_with': 'answer'},
+    # {'handler': handler_faqs_button, 'state': '*', 'starts_with': 'faqs'},
+    {'prefix': 'program', 'handler': handler_general_programs_button, 'state': '*'},
+    # {'handler': handler_support_usedesk_button, 'state': '*', 'starts_with': 'support_usedesk'},
 )

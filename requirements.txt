@@ -7,3 +7,5 @@ requests
 pytz
 aioschedule
 beautifulsoup4
+confluent-kafka
+pysocks

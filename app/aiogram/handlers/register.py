@@ -31,10 +31,18 @@ def handlers_register(dp: Dispatcher):
         )
         for h in handlers
     ]
+    # [
+    #     dp.register_callback_query_handler(
+    #         h.get('handler'),
+    #         lambda callback_query, starts_with=h.get('starts_with'): callback_query.data.startswith(starts_with),
+    #         state=h.get('state')
+    #     )
+    #     for h in handlers_inline
+    # ]
     [
         dp.register_callback_query_handler(
             h.get('handler'),
-            lambda callback_query, starts_with=h.get('starts_with'): callback_query.data.startswith(starts_with),
+            lambda callback_query, prefix=h.get('prefix'): callback_query.data.startswith(prefix),
             state=h.get('state')
         )
         for h in handlers_inline

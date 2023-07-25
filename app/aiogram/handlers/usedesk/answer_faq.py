@@ -15,22 +15,19 @@
 #
 
 
-from datetime import datetime
+from aiogram import types
+from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 
-
-from pytz import timezone
-from aiogram.types import Message
+from app.aiogram.states import States
 from app.db.manager import db_manager
-
+from app.repositories import Text
 from app.utils.decorators import user_get
-from app.utils.events_get import events_get
-
-
-tz = timezone('Europe/Moscow')
 
 
 @db_manager
 @user_get
-async def handler_general_programs(message: Message, user):
-    text, keyboard = await events_get(datetime_selected=datetime.now(tz=tz))
-    await message.answer(text=text, reply_markup=keyboard)
+async def handler_support_usedesk_button(callback_query: types.CallbackQuery, user):
+    await States.support.set()
+    keyboard = ReplyKeyboardMarkup(resize_keyboard=True)
+    keyboard.add(KeyboardButton(Text.get('back')))
+    await callback_query.message.reply(text=Text.get('text_supports'), reply_markup=keyboard)

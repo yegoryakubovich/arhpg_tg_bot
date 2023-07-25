@@ -20,6 +20,7 @@ from datetime import datetime, timedelta
 from pytz import timezone
 from aiogram.types import CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton
 
+from app.aiogram.callback_datas import program_callback_data
 from app.db.manager import db_manager
 from app.repositories import Text
 from app.utils.decorators import user_get
@@ -55,29 +56,14 @@ DAYS = {
 @db_manager
 @user_get
 async def handler_general_programs_button(callback_query: CallbackQuery, user):
-    data = callback_query.data
+    data = program_callback_data.parse(callback_query.data)
+    datetime_selected = datetime.strptime(data['datetime_selected'], '%Y-%m-%d')
+    page = int(data['page'])
 
-    date_str = data[-10:]
-    date = datetime.strptime(date_str, '%Y-%m-%d')
-    datetime_selected = datetime.now(tz=tz)
+    text, keyboard = await events_get(
+        datetime_selected=datetime_selected,
+        page=page,
+    )
 
-    if data.startswith('programs_date_select_'):
-        text = Text.get(key='taking_date')
-        keyboard = InlineKeyboardMarkup(row_width=2)
-        for days in range(5):
-            date_next = datetime_selected + timedelta(days=days)
-            keyboard.add(InlineKeyboardButton(
-                text='{weekday}, {day} {month}'.format(
-                    weekday=DAYS[date_next.isoweekday()],
-                    day=date_next.day,
-                    month=MONTHS[date_next.month],
-                ),
-                callback_data='programs_date_selected_{}'.format(date_next.strftime('%Y-%m-%d'))),
-            )
-    else:
-        datetime_selected = date
-        text, keyboard = await events_get(datetime_selected=datetime_selected)
-
-    message = callback_query.message
-    await message.edit_text(text=text)
-    await message.edit_reply_markup(reply_markup=keyboard)
+    await callback_query.message.edit_text(text=text)
+    await callback_query.message.edit_reply_markup(reply_markup=keyboard)

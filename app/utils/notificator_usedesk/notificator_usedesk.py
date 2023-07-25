@@ -26,14 +26,12 @@ from app.repositories.ticket import TicketStates
 from config import USEDESK_HOST, USEDESK_API_TOKEN
 
 
-bot = bot_get()
-
-
 lock = asyncio.Lock()
 
 
 @db_manager
 async def notificator_usedesk():
+    bot = bot_get()
     for ticket in Ticket.list_waiting_get():
         response = get(
             url=f'{USEDESK_HOST}/ticket',
@@ -52,15 +50,18 @@ async def notificator_usedesk():
             response = bs.get_text()
 
             if ticket_status == 2:
-                async with lock:
-                    await Ticket.update_state(ticket.ticket_id, TicketStates.completed)
-                    faq_button = InlineKeyboardButton(text=Text.get('menu_faqs'), callback_data="answer")
-                    keyboard = InlineKeyboardMarkup([faq_button])
-                    print(faq_button)
-                    print(InlineKeyboardButton)
-                    print(keyboard)
-                    await bot.send_message(chat_id=ticket.user.tg_user_id, text=response, parse_mode='HTML',
-                                           reply_markup=keyboard)
+                keyboard = InlineKeyboardMarkup().add(
+                    InlineKeyboardButton(text=Text.get('menu_support'), callback_data='support_usedesk')
+                )
+
+                await Ticket.update_state(ticket.ticket_id, TicketStates.completed)
+                await bot.send_message(
+                    chat_id=ticket.user.tg_user_id,
+                    text=response,
+                    parse_mode='html',
+                    reply_markup=keyboard,
+                )
             elif ticket_status in [4]:
-                async with lock:
-                    await Ticket.update_state(ticket.ticket_id, TicketStates.error)
+                await Ticket.update_state(ticket.ticket_id, TicketStates.error)
+
+    await bot.close()
