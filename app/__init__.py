@@ -29,5 +29,4 @@ def app_create():
     notificator_usedesk_create()
     notificator_create()
     notificator_kafka_create()
-    notificator_program_create()
     bot_create()

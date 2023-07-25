@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
+import asyncio
 
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from bs4 import BeautifulSoup
@@ -27,6 +27,9 @@ from config import USEDESK_HOST, USEDESK_API_TOKEN
 
 
 bot = bot_get()
+
+
+lock = asyncio.Lock()
 
 
 @db_manager
@@ -49,10 +52,15 @@ async def notificator_usedesk():
             response = bs.get_text()
 
             if ticket_status == 2:
-                await Ticket.update_state(ticket.ticket_id, TicketStates.completed)
-                faq_button = InlineKeyboardButton(text=Text.get('menu_faqs'), callback_data="faq_button")
-                keyboard = InlineKeyboardMarkup([[faq_button]])
-                await bot.send_message(chat_id=ticket.user.tg_user_id, text=response, parse_mode='HTML',
-                                       reply_markup=keyboard)
+                async with lock:
+                    await Ticket.update_state(ticket.ticket_id, TicketStates.completed)
+                    faq_button = InlineKeyboardButton(text=Text.get('menu_faqs'), callback_data="answer")
+                    keyboard = InlineKeyboardMarkup([faq_button])
+                    print(faq_button)
+                    print(InlineKeyboardButton)
+                    print(keyboard)
+                    await bot.send_message(chat_id=ticket.user.tg_user_id, text=response, parse_mode='HTML',
+                                           reply_markup=keyboard)
             elif ticket_status in [4]:
-                await Ticket.update_state(ticket.ticket_id, TicketStates.error)
+                async with lock:
+                    await Ticket.update_state(ticket.ticket_id, TicketStates.error)

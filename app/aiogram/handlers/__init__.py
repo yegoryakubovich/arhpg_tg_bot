@@ -17,6 +17,7 @@
 
 from aiogram.types import ContentType
 
+from app.aiogram.handlers.faqs.answer_faq import handler_answer_faqs
 from app.aiogram.handlers.menu import handler_menu
 from app.aiogram.handlers.programs.general.button import handler_general_programs_button
 from app.aiogram.handlers.programs.programs import handler_program
@@ -40,5 +41,6 @@ handlers = (
 
 handlers_inline = (
     {'handler': handler_faqs_button, 'state': '*', 'starts_with': 'faqs'},
-    {'handler': handler_general_programs_button, 'state': '*', 'starts_with': 'programs_'},
+    {'handler': handler_general_programs_button, 'state': '*', 'starts_with': 'programs'},
+    {'handler': handler_answer_faqs, 'state': '*', 'starts_with': 'answer'},
 )
