@@ -15,13 +15,22 @@
 #
 
 
-from app.api_client.sso import ApiClientSSO
-from app.api_client.user import ApiClientUSER
-from app.api_client.xle import ApiClientXLE
-from config import API_SSO_HOST, API_XLE_HOST, API_USER_HOST
+from app.api_client.api_client_base import ApiClientBase
+from config import API_USER_TAG_ID, API_USER_TOKEN
 
 
-class ApiClient:
-    sso = ApiClientSSO(host=API_SSO_HOST)
-    xle = ApiClientXLE(host=API_XLE_HOST)
-    user = ApiClientUSER(host=API_USER_HOST)
+class ApiClientUSER(ApiClientBase):
+    async def add_tag_user(self, arhpg_id: int):
+        response = await self.post(
+            path=f'/api/v1/users/{arhpg_id}/tags',
+            parameters={
+                "app_token": API_USER_TOKEN
+            },
+            data={
+                "tag_id": [API_USER_TAG_ID],
+                "creator_id": 1,
+                "reason": 'a2023_bot'
+            },
+        )
+        print(response)
+        return response

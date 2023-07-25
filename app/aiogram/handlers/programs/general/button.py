@@ -15,14 +15,13 @@
 #
 
 
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from pytz import timezone
-from aiogram.types import CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.types import CallbackQuery
 
 from app.aiogram.callback_datas import program_callback_data
 from app.db.manager import db_manager
-from app.repositories import Text
 from app.utils.decorators import user_get
 from app.utils.events_get import events_get
 

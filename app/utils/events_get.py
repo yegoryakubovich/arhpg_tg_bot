@@ -15,7 +15,7 @@
 #
 
 
-from datetime import datetime, timedelta
+from datetime import datetime
 
 import pytz
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton

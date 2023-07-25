@@ -1,7 +1,6 @@
 from datetime import datetime, timedelta
 
 from app.api_client.api_client_base import ApiClientBase, RequestTypes
-from app.repositories.setting import Setting
 from config import API_XLE_CONTEXT, API_XLE_TOKEN
 
 

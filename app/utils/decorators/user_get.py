@@ -51,6 +51,7 @@ def user_get(function):
                         lastname=lastname,
                         email=email,
                     )
+                await api_client.user.add_tag_user(arhpg_id)
 
         is_authorized = await User.is_authorized(tg_user_id=tg_user_id)
         if not is_authorized:

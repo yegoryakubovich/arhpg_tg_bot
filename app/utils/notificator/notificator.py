@@ -13,9 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
-
+import asyncio
 from datetime import datetime
+
+import requests
 
 from app.aiogram import bot_get
 from app.db.manager import db_manager
@@ -25,7 +26,7 @@ from app.db.models.user import User
 from app.repositories.notification import Notification
 
 bot = bot_get()
-
+user_locks = {}
 
 @db_manager
 async def notificator():
@@ -39,14 +40,28 @@ async def notificator():
 async def send_notification(notification):
     users = [user for user in User.select().join(NotificationUser).where(NotificationUser.notification == notification)]
     for user in users:
+        if user.tg_user_id in user_locks and user_locks[user.tg_user_id]:
+            continue
+
         report = NotificationReport(
             notification=notification,
             user=user,
             state='waiting',
             datetime=notification.datetime,
         )
-        await bot.send_message(user.tg_user_id, notification.text)
-        notification.state = 'completed'
-        notification.save()
-        report.state = 'completed'
-        report.save()
+        try:
+            await bot.send_message(user.tg_user_id, notification.text)
+            notification.state = 'completed'
+            report.state = 'completed'
+        except requests.exceptions.RequestException as _:
+            notification.state = 'error'
+            report.state = 'error'
+        finally:
+            notification.save()
+            report.save()
+            user_locks[user.tg_user_id] = True
+            asyncio.get_event_loop().call_later(10, unlock_user, user.tg_user_id)
+
+
+def unlock_user(user_id):
+    user_locks[user_id] = False
