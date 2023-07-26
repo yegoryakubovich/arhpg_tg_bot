@@ -16,7 +16,9 @@
 
 
 import asyncio
+import re
 
+import aiohttp
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from bs4 import BeautifulSoup
 from requests import get
@@ -48,22 +50,48 @@ async def notificator_usedesk():
             ticket_status = response['ticket']['status_id']
             ticket_response = response['comments'][0]['message']
 
-            bs = BeautifulSoup(ticket_response, features='html.parser')
-            response = bs.get_text()
-
             if ticket_status == 2:
-                keyboard = InlineKeyboardMarkup().add(
-                    InlineKeyboardButton(text=Text.get('menu_support'), callback_data='support_usedesk')
-                )
+                if ticket_response:
+                    bs = BeautifulSoup(ticket_response, features='html.parser')
+                    response_text = bs.get_text()
+                else:
+                    response_text = "Empty ticket response"
 
-                await Ticket.update_state(ticket.ticket_id, TicketStates.completed)
-                await bot.send_message(
-                    chat_id=ticket.user.tg_user_id,
-                    text=response,
-                    parse_mode='html',
-                    reply_markup=keyboard,
-                )
-            elif ticket_status in [4]:
+                if '<img' in ticket_response.lower():
+                    async with aiohttp.ClientSession() as session:
+                        image_url = re.findall(r'<img.+?src="(.+?)"', ticket_response)[0]
+                        async with session.get(image_url) as resp:
+                            if resp.status == 200:
+                                image_bytes = await resp.read()
+
+                    keyboard = InlineKeyboardMarkup().add(
+                        InlineKeyboardButton(text=Text.get('menu_support'), callback_data='support_usedesk')
+                    )
+
+                    await Ticket.update_state(ticket.ticket_id, TicketStates.completed)
+
+                    await bot.send_photo(
+                        chat_id=ticket.user.tg_user_id,
+                        photo=image_bytes,
+                        caption=response_text,
+                        parse_mode='html',
+                        reply_markup=keyboard,
+                    )
+                else:
+                    keyboard = InlineKeyboardMarkup().add(
+                        InlineKeyboardButton(text=Text.get('menu_support'), callback_data='support_usedesk')
+                    )
+
+                    await Ticket.update_state(ticket.ticket_id, TicketStates.completed)
+
+                    await bot.send_message(
+                        chat_id=ticket.user.tg_user_id,
+                        text=response_text,
+                        parse_mode='html',
+                        reply_markup=keyboard,
+                    )
+
+            elif ticket_status == 4:
                 await Ticket.update_state(ticket.ticket_id, TicketStates.error)
 
     await bot.close()

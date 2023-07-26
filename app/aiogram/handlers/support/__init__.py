@@ -15,8 +15,6 @@
 #
 
 
-import json
-
 import requests
 from aiogram import types
 
@@ -30,16 +28,23 @@ from app.utils.decorators import user_get
 from config import USEDESK_API_TOKEN, USEDESK_HOST
 
 
+
+
 @db_manager
 @user_get
 async def handler_support(message: types.Message, user):
-    text = message.text
-    if text == Text.get('back'):
+    if message.text == Text.get('back'):
         await States.menu.set()
         await message.reply(text=Text.get('menu'), reply_markup=await Kbs.menu())
         return
 
-    message_text = message.text
+    if message.text:
+        message_text = message.text
+    elif message.photo:
+        message_text = message.caption or '' or None
+    else:
+        await message.reply(text=Text.get('Неверный формат сообщения, отправьте фото или текст'))
+        return
 
     ticket_user = Ticket.list_waiting_get()
     waiting_tickets_count = sum(1 for ticket in ticket_user if ticket.state == TicketStates.waiting)
@@ -57,12 +62,18 @@ async def handler_support(message: types.Message, user):
         'client_email': user.email
     }
 
-    headers = {'Content-Type': 'application/json'}
-    response = requests.post(f'{USEDESK_HOST}/create/ticket', headers=headers, json=data)
+    files = []
+    if message.photo:
+        photo = await message.photo[-1].download()
+        with open(photo, 'rb') as photo_file:
+            files.append(('files[]', (photo_file.name, photo_file, 'image/jpeg')))
+
+    headers = {}
+    response = requests.post(f'{USEDESK_HOST}/create/ticket', headers=headers, data=data, files=files)
 
     if response.status_code == 200:
-        status = json.loads(response.content)['status']
-        ticket_id = json.loads(response.content)['ticket_id']
+        status = response.json()['status']
+        ticket_id = response.json()['ticket_id']
         await Ticket.create(
             user=user,
             message=message_text,

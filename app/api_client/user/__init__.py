@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
+import requests
 
 from app.api_client.api_client_base import ApiClientBase
 from config import API_USER_TAG_ID, API_USER_TOKEN
@@ -21,16 +21,10 @@ from config import API_USER_TAG_ID, API_USER_TOKEN
 
 class ApiClientUSER(ApiClientBase):
     async def add_tag_user(self, arhpg_id: int):
-        response = await self.post(
-            path=f'/api/v1/users/{arhpg_id}/tags',
-            parameters={
-                "app_token": API_USER_TOKEN
-            },
-            data={
-                "tag_id": [API_USER_TAG_ID],
-                "creator_id": 1,
-                "reason": 'a2023_bot'
-            },
+        response = requests.post(
+            url=f'https://test-user-php.k8.u2035dev.ru/api/v1/users/{arhpg_id}/tags',
+            headers={'app_token': API_USER_TOKEN},
+            data={"tag_id": API_USER_TAG_ID},
         )
-        print(response)
+
         return response
