@@ -36,7 +36,7 @@ handlers = (
 )
 
 handlers_inline = (
-    # {'handler': handler_faqs_button, 'state': '*', 'starts_with': 'faqs'},
+    {'prefix': 'faqs', 'handler': handler_faqs_button, 'state': '*'},
     {'prefix': 'program', 'handler': handler_general_programs_button, 'state': '*'},
-    # {'handler': handler_support_usedesk_button, 'state': '*', 'starts_with': 'support_usedesk'},
+    {'prefix': 'support_usedesk', 'handler': handler_support_usedesk_button, 'state': '*'},
 )

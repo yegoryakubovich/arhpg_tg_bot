@@ -46,9 +46,7 @@ async def handler_support(message: types.Message, user):
 
     # Лимит тикетов
     if waiting_tickets_count >= await Setting.limit_ticket():
-        await message.reply(
-            f"У вас уже есть максимальное количество активных тикетов ({waiting_tickets_count}), ожидающих ответа. "
-            f"Свяжитесь с нами позже.")
+        await message.reply(text=Text.get('max_ticket'))
         return
 
     data = {
