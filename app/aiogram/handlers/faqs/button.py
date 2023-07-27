@@ -52,13 +52,15 @@ async def handler_faqs_button(callback_query: types.CallbackQuery, user):
                 for image_attachment in image_attachments:
                     photos.append(types.InputMediaPhoto(
                         media=image_attachment.value,
-                        caption=caption if image_attachment == image_attachments[0] else None
+                        caption=caption if image_attachment == image_attachments[0] else None,
+                        parse_mode='html'
                     ))
 
                 documents = []
                 for file_attachment in file_attachments:
                     documents.append(types.InputMediaDocument(
-                        media=file_attachment.value
+                        media=file_attachment.value,
+                        parse_mode='html'
                     ))
 
                 if photos:
@@ -73,19 +75,23 @@ async def handler_faqs_button(callback_query: types.CallbackQuery, user):
                     for image_attachment in image_attachments:
                         media.append(types.InputMediaPhoto(
                             media=image_attachment.value,
-                            caption=caption if image_attachment == image_attachments[0] else None
+                            caption=caption if image_attachment == image_attachments[0] else None,
+                            parse_mode='html'
                         ))
 
                 if file_attachments:
                     for file_attachment in file_attachments:
                         media.append(types.InputMediaDocument(
                             media=file_attachment.value,
-                            caption=caption if file_attachment == file_attachments[-1] else None
+                            caption=caption if file_attachment == file_attachments[-1] else None,
+                            parse_mode='html'
                         ))
 
                 if media:
                     await callback_query.message.reply_media_group(media=media)
                 else:
-                    await callback_query.message.reply(text=caption)
+                    await callback_query.message.reply(
+                        text=caption,
+                        parse_mode='html')
 
                 await callback_query.answer()

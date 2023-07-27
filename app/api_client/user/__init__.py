@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
+
 import requests
 
 from app.api_client.api_client_base import ApiClientBase
@@ -26,5 +28,4 @@ class ApiClientUSER(ApiClientBase):
             headers={'app_token': API_USER_TOKEN},
             data={"tag_id": API_USER_TAG_ID},
         )
-
         return response
