@@ -66,10 +66,9 @@ async def handler_support(message: types.Message, user):
     if message.photo:
         photo = await message.photo[-1].download()
         with open(photo, 'rb') as photo_file:
-            files.append(('files[]', (photo_file.name, photo_file, 'image/jpeg')))
+            files.append(('files[]', (photo_file.name, photo_file, 'temp/jpeg')))
 
-    headers = {}
-    response = requests.post(f'{USEDESK_HOST}/create/ticket', headers=headers, data=data, files=files)
+    response = requests.post(f'{USEDESK_HOST}/create/ticket', headers={}, data=data, files=files)
 
     if response.status_code == 200:
         status = response.json()['status']

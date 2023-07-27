@@ -31,27 +31,30 @@ def user_get(function):
 
         if type(obj) is Message:
             message = obj
-            commands = message.text.split()
+            if hasattr(message, 'photo'):
+                pass
+            else:
+                commands = message.text.split()
 
-            if len(commands) == 2:
-                arhpg_token = commands[-1]
+                if len(commands) == 2:
+                    arhpg_token = commands[-1]
 
-                sso_user = await api_client.sso.user_get(token=arhpg_token)
-                arhpg_id = sso_user.get('unti_id')
-                firstname = sso_user.get('firstname')
-                lastname = sso_user.get('lastname')
-                email = sso_user.get('email')
+                    sso_user = await api_client.sso.user_get(token=arhpg_token)
+                    arhpg_id = sso_user.get('unti_id')
+                    firstname = sso_user.get('firstname')
+                    lastname = sso_user.get('lastname')
+                    email = sso_user.get('email')
 
-                if arhpg_id:
-                    await User.create(
-                        arhpg_id=arhpg_id,
-                        arhpg_token=arhpg_token,
-                        tg_user_id=tg_user_id,
-                        firstname=firstname,
-                        lastname=lastname,
-                        email=email,
-                    )
-                    await api_client.user.add_tag_user(arhpg_id)
+                    if arhpg_id:
+                        await User.create(
+                            arhpg_id=arhpg_id,
+                            arhpg_token=arhpg_token,
+                            tg_user_id=tg_user_id,
+                            firstname=firstname,
+                            lastname=lastname,
+                            email=email,
+                        )
+                        await api_client.user.add_tag_user(arhpg_id)
 
         is_authorized = await User.is_authorized(tg_user_id=tg_user_id)
         if not is_authorized:

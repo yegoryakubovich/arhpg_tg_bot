@@ -32,7 +32,9 @@ handlers = (
     {'handler': handler_start, 'state': '*', 'content_types': [ContentType.TEXT], 'commands': ['start', 'menu']},
     {'handler': handler_menu, 'state': States.menu, 'content_types': [ContentType.TEXT]},
     {'handler': handler_program, 'state': States.programs, 'content_types': [ContentType.TEXT]},
-    {'handler': handler_support, 'state': States.support, 'content_types': [ContentType.TEXT]},
+    {'handler': handler_support, 'state': States.support, 'content_types': [ContentType.TEXT,
+                                                                            ContentType.PHOTO,
+                                                                            ContentType.DOCUMENT]},
 )
 
 handlers_inline = (
