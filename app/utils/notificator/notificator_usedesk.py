@@ -55,7 +55,7 @@ async def notificator_usedesk():
                     bs = BeautifulSoup(ticket_response, features='html.parser')
                     response_text = bs.get_text()
                 else:
-                    response_text = "Empty ticket response"
+                    response_text = await Ticket.update_state(ticket.ticket_id, TicketStates.error)
 
                 if '<img' in ticket_response.lower():
                     async with aiohttp.ClientSession() as session:

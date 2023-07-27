@@ -15,6 +15,9 @@
 #
 
 
+import os
+
+
 import requests
 from aiogram import types
 
@@ -23,11 +26,8 @@ from app.aiogram.states import States
 from app.db.manager import db_manager
 from app.repositories import Ticket, Text
 from app.repositories.ticket import TicketStates
-from app.repositories.setting import Setting
 from app.utils.decorators import user_get
 from config import USEDESK_API_TOKEN, USEDESK_HOST
-
-
 
 
 @db_manager
@@ -38,20 +38,29 @@ async def handler_support(message: types.Message, user):
         await message.reply(text=Text.get('menu'), reply_markup=await Kbs.menu())
         return
 
+    files = []
     if message.text:
         message_text = message.text
     elif message.photo:
-        message_text = message.caption or '' or None
+        if not os.path.exists('temp'):
+            os.makedirs('temp')
+        max_photo = max(message.photo, key=lambda p: p.file_size)
+        photo = await max_photo.download(destination_dir='temp')
+        with open(photo.name, 'rb') as photo_file:
+            photo_data = photo_file.read()
+        files.append(('files[]', (photo.name, photo_data, 'image/jpeg')))
+        message_text = message.caption or '(фото без комментариев)'
+    # elif message.document:
+    #     if not os.path.exists('temp'):
+    #         os.makedirs('temp')
+    #     document = message.document
+    #     await document.download(destination_dir='temp')
+    #     with open(document.file_name) as document_file:
+    #         document_data = document_file.read()
+    #     files.append(('files[]', (document.file_name, document_data, 'application/docx')))
+    #     message_text = message.caption or '(файл без комментариев)'
     else:
-        await message.reply(text=Text.get('Неверный формат сообщения, отправьте фото или текст'))
-        return
-
-    ticket_user = Ticket.list_waiting_get()
-    waiting_tickets_count = sum(1 for ticket in ticket_user if ticket.state == TicketStates.waiting)
-
-    # Лимит тикетов
-    if waiting_tickets_count >= await Setting.limit_ticket():
-        await message.reply(text=Text.get('max_ticket'))
+        await message.reply(text=Text.get('error_format'))
         return
 
     data = {
@@ -62,25 +71,21 @@ async def handler_support(message: types.Message, user):
         'client_email': user.email
     }
 
-    files = []
-    if message.photo:
-        photo = await message.photo[-1].download()
-        with open(photo, 'rb') as photo_file:
-            files.append(('files[]', (photo_file.name, photo_file, 'temp/jpeg')))
-
     response = requests.post(f'{USEDESK_HOST}/create/ticket', headers={}, data=data, files=files)
 
     if response.status_code == 200:
-        status = response.json()['status']
-        ticket_id = response.json()['ticket_id']
-        await Ticket.create(
-            user=user,
-            message=message_text,
-            state=TicketStates.waiting,
-            ticket_id=ticket_id,
-        )
-
-        if status == 'success':
+        response_data = response.json()
+        if 'status' in response_data and response_data['status'] == 'success':
+            ticket_id = response_data['ticket_id']
+            await Ticket.create(
+                user=user,
+                message=message_text,
+                state=TicketStates.waiting,
+                ticket_id=ticket_id,
+            )
             await message.reply(text=Text.get('sent_ticket'))
         else:
             await message.reply(text=Text.get('error_ticket'))
+    else:
+        await message.reply(text=Text.get('error_ticket'))
+
