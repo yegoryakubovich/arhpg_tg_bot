@@ -22,7 +22,7 @@ from threading import Thread
 import aioschedule as schedule
 
 from app.utils.notificator.notificator import notificator
-from app.utils.notificator.notificator_kafka import notificator_kafka
+# from app.utils.notificator.notificator_kafka import notificator_kafka
 from app.utils.notificator.notificator_usedesk import notificator_usedesk
 
 
@@ -31,7 +31,7 @@ def notificator_thread():
     set_event_loop(loop)
 
     schedule.every(10).seconds.do(notificator)
-    schedule.every(10).seconds.do(notificator_kafka)
+    # schedule.every(10).seconds.do(notificator_kafka)
     schedule.every(1).minute.do(notificator_usedesk)
     while True:
         loop.run_until_complete(schedule.run_pending())

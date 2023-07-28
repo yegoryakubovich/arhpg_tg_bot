@@ -25,7 +25,7 @@ from app.db.models.user import User as UserModel
 from app.db.models.notification import Notification as NotificationModel
 from app.db.models.notification_user import NotificationUser as NotificationUserModel
 from app.db.models.notification_report import NotificationReport as NotificationReportModel
-
+from app.db.models.users_tags import UserTag
 
 models = (
     SettingModel,
@@ -38,4 +38,5 @@ models = (
     NotificationModel,
     NotificationUserModel,
     NotificationReportModel,
+    UserTag,
 )
