@@ -18,6 +18,7 @@
 import asyncio
 import re
 
+
 import aiohttp
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from bs4 import BeautifulSoup
@@ -73,6 +74,27 @@ async def notificator_usedesk():
                     await bot.send_photo(
                         chat_id=ticket.user.tg_user_id,
                         photo=image_bytes,
+                        caption=response_text,
+                        parse_mode='html',
+                        reply_markup=keyboard,
+                    )
+                elif '<a href="' in ticket_response.lower():
+                    async with aiohttp.ClientSession() as session:
+                        doc_url = re.findall(r'<a href="(.+?)"', ticket_response)[0]
+                        print("Document URL:", doc_url)
+                        async with session.get(doc_url) as resp:
+                            if resp.status == 200:
+                                doc_bytes = await resp.read()
+
+                    keyboard = InlineKeyboardMarkup().add(
+                        InlineKeyboardButton(text=Text.get('menu_support'), callback_data='support_usedesk')
+                    )
+
+                    await Ticket.update_state(ticket.ticket_id, TicketStates.completed)
+
+                    await bot.send_document(
+                        chat_id=ticket.user.tg_user_id,
+                        document=doc_bytes,
                         caption=response_text,
                         parse_mode='html',
                         reply_markup=keyboard,
