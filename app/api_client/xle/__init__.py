@@ -20,7 +20,6 @@ from datetime import datetime, timedelta
 from app.api_client.api_client_base import ApiClientBase, RequestTypes
 from config import API_XLE_CONTEXT, API_XLE_TOKEN
 
-
 class ApiClientXLE(ApiClientBase):
     async def get_user_events(self, arhpg_id: int, start_date: str):
         events = []
@@ -67,19 +66,6 @@ class ApiClientXLE(ApiClientBase):
             events.extend(response)
         return events
 
-    async def get_events_user(self, arhpg_id: int, type_id: int):
-        user = []
-        response = await self.get(
-            path=f'/api/v1/request/participant',
-            parameters={
-                'app_token': API_XLE_TOKEN,
-                'unti_id': arhpg_id,
-                'type_uuid': type_id
-            },
-        )
-        user.extend(response)
-        return user
-
     async def get(self, path: str, parameters=None, token: str = None):
         if parameters is None:
             parameters = {}
@@ -91,4 +77,3 @@ class ApiClientXLE(ApiClientBase):
         )
 
         return response
-

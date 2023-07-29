@@ -13,15 +13,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from app.api_client.event import ApiClientEVENT
-from app.api_client.sso import ApiClientSSO
-from app.api_client.user import ApiClientUSER
-from app.api_client.xle import ApiClientXLE
-from config import API_SSO_HOST, API_XLE_HOST, API_USER_HOST
 
 
-class ApiClient:
-    sso = ApiClientSSO(host=API_SSO_HOST)
-    xle = ApiClientXLE(host=API_XLE_HOST)
-    user = ApiClientUSER(host=API_USER_HOST)
-    event = ApiClientEVENT(host=API_EVENT_HOST)
+from app.api_client.api_client_base import ApiClientBase
+from config import API_EVENT_TOKEN
+
+
+class ApiClientEVENT(ApiClientBase):
+    async def get_events_user(self, event_id: int):
+        response = await self.get(
+            path=f'timetable/api/v1/events/{event_id}/signed-users',
+            parameters={
+                'app_token': API_EVENT_TOKEN,
+            },
+        )
+        users = response.get('payload', [])
+        return users

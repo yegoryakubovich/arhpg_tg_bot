@@ -49,6 +49,10 @@ API_USER_HOST = config_api['user_host']
 API_USER_TOKEN = config_api['user_token']
 API_USER_TAG_ID = config_api['user_tag_id']
 
+API_EVENT_HOST = config_api['event_host']
+API_EVENT_TOKEN = config_api['event_token']
+
+
 TG_BOT_USERNAME = config_tg['bot_username']
 TG_BOT_TOKEN = config_tg['bot_token']
 
