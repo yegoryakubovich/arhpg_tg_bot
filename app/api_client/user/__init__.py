@@ -24,8 +24,9 @@ from config import API_USER_TAG_ID, API_USER_TOKEN
 class ApiClientUSER(ApiClientBase):
     async def add_tag_user(self, arhpg_id: int):
         response = requests.post(
-            url=f'https://test-user-php.k8.u2035dev.ru/api/v1/users/{arhpg_id}/tags',
+            url=f'https://user-php.k8-dev.u2035dev.ru/api/v1/users/{arhpg_id}/tags',
             headers={'app_token': API_USER_TOKEN},
             data={"tag_id": API_USER_TAG_ID},
         )
+        print(response)
         return response

@@ -67,14 +67,14 @@ class ApiClientXLE(ApiClientBase):
             events.extend(response)
         return events
 
-    async def get_events_user(self, arhpg_id: int, event_id: int):
+    async def get_events_user(self, arhpg_id: int, type_id: int):
         user = []
         response = await self.get(
-            path=f'/request/participant',
+            path=f'/api/v1/request/participant',
             parameters={
                 'app_token': API_XLE_TOKEN,
                 'unti_id': arhpg_id,
-                'type_uuid': event_id
+                'type_uuid': type_id
             },
         )
         user.extend(response)

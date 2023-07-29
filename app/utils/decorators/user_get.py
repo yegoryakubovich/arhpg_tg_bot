@@ -33,7 +33,7 @@ def user_get(function):
             message = obj
             if hasattr(message, 'photo'):
                 pass
-            else:
+            if hasattr(message, 'text') and message.text:
                 commands = message.text.split()
 
                 if len(commands) == 2:

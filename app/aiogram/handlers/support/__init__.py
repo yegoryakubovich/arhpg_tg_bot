@@ -16,7 +16,7 @@
 
 
 import os
-
+import time
 
 import requests
 from aiogram import types
@@ -45,20 +45,23 @@ async def handler_support(message: types.Message, user):
         if not os.path.exists('temp'):
             os.makedirs('temp')
         max_photo = max(message.photo, key=lambda p: p.file_size)
-        photo = await max_photo.download(destination_dir='temp')
-        with open(photo.name, 'rb') as photo_file:
+        file_path = os.path.join('temp', f'photo_{message.from_user.id}.jpg')
+        await max_photo.download(destination=file_path)
+        with open(file_path, 'rb') as photo_file:
             photo_data = photo_file.read()
-        files.append(('files[]', (photo.name, photo_data, 'image/jpeg')))
+        files.append(('files[]', (os.path.basename(file_path), photo_data, 'image/jpeg')))
         message_text = message.caption or '(фото без комментариев)'
-    # elif message.document:
-    #     if not os.path.exists('temp'):
-    #         os.makedirs('temp')
-    #     document = message.document
-    #     await document.download(destination_dir='temp')
-    #     with open(document.file_name) as document_file:
-    #         document_data = document_file.read()
-    #     files.append(('files[]', (document.file_name, document_data, 'application/docx')))
-    #     message_text = message.caption or '(файл без комментариев)'
+    elif message.document:
+        if not os.path.exists('temp'):
+            os.makedirs('temp')
+        document = message.document
+        document_file_name = document.file_name
+        document_path = os.path.join('temp', document_file_name)
+        await message.document.download(destination=document_path)
+        with open(document_path, 'rb') as document_file:
+            document_data = document_file.read()
+        files.append(('files[]', (document_file_name, document_data, 'application/docx')))
+        message_text = message.caption or '(файл без комментариев)'
     else:
         await message.reply(text=Text.get('error_format'))
         return
@@ -89,3 +92,8 @@ async def handler_support(message: types.Message, user):
     else:
         await message.reply(text=Text.get('error_ticket'))
 
+    time.sleep(2)
+    for filename in os.listdir('temp'):
+        file_path = os.path.join('temp', filename)
+        if os.path.isfile(file_path):
+            os.unlink(file_path)
