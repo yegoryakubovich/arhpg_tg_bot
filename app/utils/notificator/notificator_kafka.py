@@ -62,7 +62,7 @@ async def notificator_kafka():
                     if message_action == 'update':
                         event_id = data.get('id', {}).get('event', {}).get('uuid')
                         user_data = await api_client.xle.get_events_user(event_id)
-                        unti_ids = {user.get('unti_id') for user in user_data}  
+                        unti_ids = {user.get('unti_id') for user in user_data}
                         arhpg_ids = await User.get_all_arhpg_id()
 
                         tg_user_ids = list(unti_ids.intersection(arhpg_ids))

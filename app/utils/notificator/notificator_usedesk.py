@@ -16,10 +16,12 @@
 
 
 import asyncio
+import os
 import re
-
+import tempfile
 
 import aiohttp
+from aiogram import types
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from bs4 import BeautifulSoup
 from requests import get
@@ -48,9 +50,11 @@ async def notificator_usedesk():
 
         if response.status_code == 200:
             response = response.json()
+            print(response)
             ticket_status = response['ticket']['status_id']
             ticket_response = response['comments'][0]['message']
-
+            file_url_list = response['comments'][0]['files']
+            print(file_url_list)
             if ticket_status == 2:
                 if ticket_response:
                     bs = BeautifulSoup(ticket_response, features='html.parser')
@@ -78,13 +82,16 @@ async def notificator_usedesk():
                         parse_mode='html',
                         reply_markup=keyboard,
                     )
-                elif '<a href="' in ticket_response.lower():
+                elif file_url_list and isinstance(file_url_list, list) and len(file_url_list) > 0:
+                    doc_url = file_url_list[0]['file']
                     async with aiohttp.ClientSession() as session:
-                        doc_url = re.findall(r'<a href="(.+?)"', ticket_response)[0]
-                        print("Document URL:", doc_url)
                         async with session.get(doc_url) as resp:
                             if resp.status == 200:
                                 doc_bytes = await resp.read()
+
+                    with tempfile.NamedTemporaryFile(suffix='.docx', delete=False) as tmp_file:
+                        tmp_file.write(doc_bytes)
+                        tmp_filename = tmp_file.name
 
                     keyboard = InlineKeyboardMarkup().add(
                         InlineKeyboardButton(text=Text.get('menu_support'), callback_data='support_usedesk')
@@ -92,13 +99,16 @@ async def notificator_usedesk():
 
                     await Ticket.update_state(ticket.ticket_id, TicketStates.completed)
 
-                    await bot.send_document(
-                        chat_id=ticket.user.tg_user_id,
-                        document=doc_bytes,
-                        caption=response_text,
-                        parse_mode='html',
-                        reply_markup=keyboard,
-                    )
+                    with open(tmp_filename, 'rb'):
+                        await bot.send_document(
+                            chat_id=ticket.user.tg_user_id,
+                            document=types.input_file.InputFile(tmp_filename),
+                            caption=response_text,
+                            parse_mode='html',
+                            reply_markup=keyboard,
+                        )
+
+                    os.remove(tmp_filename)
                 else:
                     keyboard = InlineKeyboardMarkup().add(
                         InlineKeyboardButton(text=Text.get('menu_support'), callback_data='support_usedesk')
