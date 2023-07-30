@@ -1,20 +1,3 @@
-#
-# (c) 2023, Yegor Yakubovich, yegoryakubovich.com, personal@yegoryakybovich.com
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
-
-
 from datetime import datetime
 
 import pytz
@@ -82,7 +65,7 @@ async def events_get(datetime_selected: datetime, page=1):
         text=Text.get(key='earlier'),
         callback_data=program_callback_data.new(
             datetime_selected=datetime_selected.strftime('%Y-%m-%d'),
-            page=1 if page == 1 else page-1,
+            page=1 if page == 1 else page - 1,
         ),
     )
 
@@ -90,7 +73,7 @@ async def events_get(datetime_selected: datetime, page=1):
         text=Text.get(key='later'),
         callback_data=program_callback_data.new(
             datetime_selected=datetime_selected.strftime('%Y-%m-%d'),
-            page=events_count if page == 5 else page+1,
+            page=events_count if page == 5 else page + 1,
         ),
     )
 
